@@ -27,7 +27,7 @@
       @close="closeAddDrawer"
     >
       <Search
-      ref="search"
+        ref="search"
         :search="[
           { title: '客户名称', type: 'autocomplate' },
           { title: '订单号', type: 'input' },
@@ -174,9 +174,7 @@
             >
               <template slot-scope="scope">
                 <el-input
-                  style="
-                    width: 100%;
-                  "
+                  style="width: 100%"
                   placeholder="请输入"
                   v-model="perValue[scope.$index]"
                 ></el-input>
@@ -189,7 +187,10 @@
               class-name="li inputLi"
             >
               <template slot-scope="scope">
-                <el-input placeholder="请输入" v-model="perNum[scope.$index]"></el-input>
+                <el-input
+                  placeholder="请输入"
+                  v-model="perNum[scope.$index]"
+                ></el-input>
               </template>
             </el-table-column>
             <el-table-column
@@ -199,7 +200,7 @@
               class-name="li"
             >
               <template slot-scope="scope">
-                {{perValue[scope.$index]*perNum[scope.$index]}}
+                {{ perValue[scope.$index] * perNum[scope.$index] }}
               </template>
             </el-table-column>
           </el-table>
@@ -215,9 +216,15 @@
       @close="closeSelectDrawer"
       direction="rtl"
     >
-    <el-button @click="closeSelectDrawer" type="primary" size='small' style="float:right;margin-bottom:10px;width:78px;">确定</el-button>
+      <el-button
+        @click="closeSelectDrawer"
+        type="primary"
+        size="small"
+        style="float: right; margin-bottom: 10px; width: 78px"
+        >确定</el-button
+      >
       <el-table
-        :data="list"
+        :data="productsList"
         border
         stripe
         fit
@@ -247,7 +254,7 @@
                 text-align: start !important;
               "
             >
-              PCBA-全格-蓝牙版-UVC-杀菌灯板
+             {{scope.row.customer_code}}
             </span>
           </template>
         </el-table-column>
@@ -266,7 +273,7 @@
                 text-align: start !important;
               "
             >
-              PCBA-全格-蓝牙版-UVC-杀菌灯板
+              {{scope.row.product_code}}
             </span>
           </template>
         </el-table-column>
@@ -285,7 +292,7 @@
                 text-align: start !important;
               "
             >
-              PCBA-全格-蓝牙版-UVC-杀菌灯板
+              {{scope.row.product_name}}
             </span>
           </template>
         </el-table-column>
@@ -318,7 +325,7 @@
                   text-align: start !important;
                 "
               >
-                UVA-UVC-杀菌灯260-280nm-395-405nm-3.5x3.5x1.41mm-3-6W-5-7V-3.0-3.4V-40-100mA
+                {{scope.row.procudt_specs}}
               </span>
             </el-popover>
           </template>
@@ -326,14 +333,15 @@
       </el-table>
     </el-drawer>
     <!--信息  -->
-<el-drawer class="details"
-    :visible.sync = "visibleDetails"
-    title="订单信息"
-    size="60%"
-    direction="rtl"
-    @close="closeDetails"
->
-<div style="display: flex; flex-wrap: wrap" class="info">
+    <el-drawer
+      class="details"
+      :visible.sync="visibleDetails"
+      title="订单信息"
+      size="60%"
+      direction="rtl"
+      @close="closeDetails"
+    >
+      <div style="display: flex; flex-wrap: wrap" class="info">
         <div>
           <div>客户名称</div>
           <div>ds</div>
@@ -348,9 +356,7 @@
         </div>
         <div>
           <div>订单状态</div>
-          <div>
-            v
-          </div>
+          <div>v</div>
         </div>
         <div>
           <div>备注</div>
@@ -368,8 +374,7 @@
           margin: 10px;
           padding: 10px 20px;
         "
-      >
-      </div>
+      ></div>
 
       <div style="margin: 10px">
         <el-table
@@ -461,7 +466,7 @@
                     text-align: start !important;
                   "
                 >
-                 vasvas
+                  vasvas
                 </span>
               </el-popover>
             </template>
@@ -496,7 +501,7 @@
                     text-align: start !important;
                   "
                 >
-                 savas
+                  savas
                 </span>
               </el-popover>
             </template>
@@ -523,14 +528,14 @@
                     text-align: start !important;
                   "
                 >
-                asv
+                  asv
                 </span>
               </el-popover>
             </template>
           </el-table-column>
         </el-table>
       </div>
-</el-drawer>
+    </el-drawer>
     <!-- 列表 -->
     <div
       style="
@@ -866,7 +871,9 @@
           class-name="button orderButton"
         >
           <template slot-scope="scope" style="display: flex; flex-wrap: wrap">
-            <el-button type="primary" size="small" @click="details">订单信息</el-button>
+            <el-button type="primary" size="small" @click="details"
+              >订单信息</el-button
+            >
             <el-button type="primary" size="small" @click="edit"
               >编辑</el-button
             >
@@ -904,7 +911,7 @@
 </template>
 
 <script>
-import { getList,getProductList } from "@/api/table";
+import { getList, getProductList } from "@/api/table";
 import Search from "@/components/Search/index.vue";
 import throttle from "lodash/throttle";
 
@@ -925,10 +932,7 @@ export default {
   data() {
     return {
       //展示的list
-      list: [
-        { id: 0 },
-        { id: 1 },
-      ],
+      list: [{ id: 0 }, { id: 1 }],
       listLoading: false,
       productsList: [],
       //
@@ -939,11 +943,11 @@ export default {
       //
       visibleAdd: false,
       visibleProductions: false,
-      visibleDetails:false,
+      visibleDetails: false,
       //
       //添加的单价
-      perValue:[],
-      perNum:[],
+      perValue: [],
+      perNum: [],
       //#region
       //产品信息抽屉
       // drawer: false,
@@ -1044,15 +1048,15 @@ export default {
   mounted() {
     this.$bus.$on("add", this.addOpenDrawer);
     this.$bus.$on("select", this.selectOpenDrawer);
-    this.$bus.$on('determine',this.sendOrder)
+    this.$bus.$on("determine", this.sendOrder);
   },
   beforeDestroy() {
     this.$bus.$off();
   },
   methods: {
     //添加的确定按钮
-    sendOrder(a){
-      console.log('@',this.perValue,this.perNum,a);
+    sendOrder(a) {
+      console.log("@", this.perValue, this.perNum, a);
     },
     pageChange(current) {
       this.page_current = current;
@@ -1068,14 +1072,15 @@ export default {
       this.visibleAdd = false;
     },
     //产品选择
-    selectOpenDrawer() {
-      getProductList().then(()=>{
-
-      });
+    selectOpenDrawer(customer_id) {
+      getProductList(customer_id).then((res) => {
+        this.productsList = res.data.res;
       this.visibleProductions = true;
+      });
     },
     closeSelectDrawer() {
       let a = this.$refs.search.sendInfo();
+      console.log("@@@", a);
       this.visibleProductions = false;
     },
     //获取产品序号
@@ -1087,11 +1092,11 @@ export default {
       this.addOpenDrawer();
     },
     //打开订单信息的抽屉
-    details(){
+    details() {
       this.visibleDetails = true;
     },
-    closeDetails(){
-      this.visibleDetails =false;
+    closeDetails() {
+      this.visibleDetails = false;
     },
     //初始化
     fetchData() {
@@ -1189,12 +1194,12 @@ export default {
     height: 100%;
     width: 100%;
     line-height: 34.5px;
-    .el-input{
+    .el-input {
       height: 100%;
       position: absolute;
       left: 0;
-      right:0;
-      input{
+      right: 0;
+      input {
         height: 100%;
       }
     }
@@ -1234,29 +1239,29 @@ export default {
     }
   }
 }
-  .info {
-    margin: 10px;
-    justify-content: flex-start;
-    background-color: rgba(230, 230, 230, 0.4);
-    border-radius: 10px;
+.info {
+  margin: 10px;
+  justify-content: flex-start;
+  background-color: rgba(230, 230, 230, 0.4);
+  border-radius: 10px;
+  padding: 20px;
+  & > div {
+    // border:1px solid black;
+    height: 60px;
+    width: 30%;
+    // background-color: pink;
+    div:first-child {
+      font-weight: 700;
+      height: 30px;
+      line-height: 30px;
+      color: #909399;
+      // background-color: yellow;
+    }
+  }
+}
+.details {
+  .el-drawer__body {
     padding: 20px;
-    & > div {
-      // border:1px solid black;
-      height: 60px;
-      width: 30%;
-      // background-color: pink;
-      div:first-child {
-        font-weight: 700;
-        height: 30px;
-        line-height: 30px;
-        color: #909399;
-        // background-color: yellow;
-      }
-    }
   }
-  .details{
-    .el-drawer__body{
-      padding:20px;
-    }
-  }
+}
 </style>

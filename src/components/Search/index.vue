@@ -220,8 +220,18 @@ export default {
             });
           }
           break;
-        case "选择产品":
-          this.$bus.$emit("select");
+        case "选择产品":{
+          getCompanyList(this.searchInfo[0]).then((res) => {
+              // // this.searchInfo[0]=res.data.res[0].id
+              // this.$bus.$emit("determine", {
+              //   info: this.searchInfo,
+              //   id: this.selectId,
+              //   info0: res.data.res[0].id,
+              // });
+          this.$bus.$emit("select",res.data.res[0].id);
+
+            });
+        }
           break;
         default:
           break;
