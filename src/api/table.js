@@ -244,10 +244,13 @@ export function getDepotList(){
   })
 }
 //获取产品信息
-export function getProductList(){
+export function getProductList(params){
   return request({
-    url:"",
-    method:'',
+    url:"/admin/product/getCustomerProduct",
+    method:'get',
+    params:{
+      customer_id:params
+    }
   })
 }
 //删除库存
