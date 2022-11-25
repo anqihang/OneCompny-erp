@@ -35,7 +35,13 @@ const actions = {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
+        // commit('SET_TOKEN',data.X-token)
         setToken(data.token)
+        //--------------------------------
+        commit('SET_NAME',data.name)
+        localStorage.setItem('name',data.name);
+        //--------------------------------
+        // setToken(data.X-token);
         resolve()
       }).catch(error => {
         reject(error)
@@ -50,13 +56,14 @@ const actions = {
         const { data } = response
 
         if (!data) {
-          return reject('Verification failed, please Login again.')
+          // return reject('Verification failed, please Login again.')
+          return reject('验证失败，请重新登录')
         }
 
         const { name, avatar } = data
 
         commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        // commit('SET_AVATAR', avatar)
         resolve(data)
       }).catch(error => {
         reject(error)

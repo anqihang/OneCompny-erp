@@ -18,3 +18,16 @@ export function validUsername(str) {
   const valid_map = ['admin', 'editor']
   return valid_map.indexOf(str.trim()) >= 0
 }
+/**
+ * 
+ */
+export function validAllChinese(str){
+  // return /^[\u4e00-\u9fa5]{1,}$/.test(str);
+  return (rule,value,callback)=>{
+    if(/^[\u4e00-\u9fa5]{1,}$/.test(str)==false){
+      callback(new Error('请输入正确的公司名'));
+    }else{
+      callback();
+    }
+  }
+}

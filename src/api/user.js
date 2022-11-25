@@ -2,9 +2,14 @@ import request from '@/utils/request'
 
 export function login(data) {
   return request({
-    url: '/vue-admin-template/user/login',
+    // url: '/vue-admin-template/user/login',
+    url: 'admin/index/login',
     method: 'post',
-    data
+    // data
+    data:{
+      account:data.username,
+      pwd:data.password
+    }
   })
 }
 
