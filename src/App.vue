@@ -139,4 +139,10 @@ export default {
 :focus{
   outline:0
 }
+#el-drawer__title{
+  // margin-bottom: 0;
+}
+.el-drawer__body{
+  padding-top: 0!important;
+}
 </style>

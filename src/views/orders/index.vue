@@ -7,14 +7,23 @@
         { title: '客户料号', type: 'input' },
         { title: '产品料号', type: 'input' },
         { title: '产品名称', type: 'input' },
-        { title: '订单状态', type: 'input' },
-        { title: '描述', type: 'input' },
+        { title: '订单状态', type: 'select' },
         { title: '备注', type: 'input' },
       ]"
       :button="[
         { title: '搜索', type: '' },
         { title: '重置', type: '' },
         { title: '添加', type: 'primary' },
+      ]"
+      :selectInfo="[
+        {
+          value: '0',
+          label: '进行中',
+        },
+        {
+          value: '1',
+          label: '已完成',
+        },
       ]"
     ></Search>
     <!-- //添加 -->
@@ -23,18 +32,19 @@
       :visible.sync="visibleAdd"
       direction="rtl"
       size="70%"
-      title="添加订单"
+      :title="isEdit?'编辑订单':'添加订单'"
+      style="min-width: 1400px"
       @close="closeAddDrawer"
     >
       <Search
         ref="search"
         :search="[
-          { title: '客户名称', type: 'autocomplate' },
-          { title: '订单号', type: 'input' },
-          { title: '订单PDF文件', type: 'file' },
-          { title: '项目名称', type: 'input' },
-          { title: '工单号', type: 'input' },
-          { title: '备注', type: 'input' },
+          { title: '客户名称', type: 'autocomplate',disabled:isEdit },
+          { title: '订单号', type: 'input',disabled:isEdit },
+          { title: '订单PDF图片', type: 'file',disabled:isEdit },
+          { title: '项目名称', type: 'input' ,disabled:isEdit},
+          { title: '工单号', type: 'input' ,disabled:isEdit},
+          { title: '备注', type: 'input',disabled:isEdit },
         ]"
         :button="[
           { title: '确定', type: 'primary' },
@@ -56,7 +66,7 @@
         </div>
         <div class="inpu">
           <el-table
-            :data="list"
+            :data="addProductsList"
             border
             stripe
             fit
@@ -89,7 +99,7 @@
                     text-align: start !important;
                   "
                 >
-                  PCBA-全格-蓝牙版-UVC-杀菌灯板
+                  {{ scope.row.customer_code }}
                 </span>
               </template>
             </el-table-column>
@@ -108,7 +118,7 @@
                     text-align: start !important;
                   "
                 >
-                  PCBA-全格-蓝牙版-UVC-杀菌灯板
+                  {{ scope.row.product_code }}
                 </span>
               </template>
             </el-table-column>
@@ -127,7 +137,7 @@
                     text-align: start !important;
                   "
                 >
-                  PCBA-全格-蓝牙版-UVC-杀菌灯板
+                  {{ scope.row.product_name }}
                 </span>
               </template>
             </el-table-column>
@@ -150,7 +160,7 @@
                   placement="top-start"
                   min-width="200%"
                   trigger="hover"
-                  content="aaaaaaaaaaaaaa"
+                  :content="scope.row.procudt_specs"
                 >
                   <span
                     class="threeLine"
@@ -161,12 +171,13 @@
                       text-align: start !important;
                     "
                   >
-                    UVA-UVC-杀菌灯260-280nm-395-405nm-3.5x3.5x1.41mm-3-6W-5-7V-3.0-3.4V-40-100mA
+                    {{ scope.row.product_specs }}
                   </span>
                 </el-popover>
               </template>
             </el-table-column>
             <el-table-column
+            v-if="!isEdit"
               label="产品单价"
               align="center"
               min-width="100"
@@ -178,6 +189,17 @@
                   placeholder="请输入"
                   v-model="perValue[scope.$index]"
                 ></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column
+            v-if="isEdit"
+              label="产品单价"
+              align="center"
+              min-width="100"
+              class-name="li"
+            >
+              <template slot-scope="scope">
+                10
               </template>
             </el-table-column>
             <el-table-column
@@ -203,6 +225,35 @@
                 {{ perValue[scope.$index] * perNum[scope.$index] }}
               </template>
             </el-table-column>
+            <el-table-column
+              align="center"
+              label="操作"
+              width="200"
+              fixed="right"
+              class-name="button"
+            >
+              <template
+                slot-scope="scope"
+                style="display: flex; flex-wrap: wrap"
+              >
+                <el-button type="info" size="small"></el-button>
+                <el-popconfirm
+                  title="确定删除吗？"
+                  icon="el-icon-info"
+                  icon-color="red"
+                  @onConfirm=""
+                >
+                  <el-button type="danger" size="small" slot="reference">
+                    删除
+                  </el-button>
+                </el-popconfirm>
+                <el-button type="info" size="small"></el-button>
+                <el-button type="info" size="small"></el-button>
+                
+                <el-button type="info" size="small"></el-button>
+                <el-button type="info" size="small"></el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </div>
       </div>
@@ -213,6 +264,7 @@
       :visible.sync="visibleProductions"
       title="产品列表"
       size="60%"
+      style="min-width: 1300px"
       @close="closeSelectDrawer"
       direction="rtl"
     >
@@ -254,7 +306,7 @@
                 text-align: start !important;
               "
             >
-             {{scope.row.customer_code}}
+              {{ scope.row.customer_code }}
             </span>
           </template>
         </el-table-column>
@@ -273,7 +325,7 @@
                 text-align: start !important;
               "
             >
-              {{scope.row.product_code}}
+              {{ scope.row.product_code }}
             </span>
           </template>
         </el-table-column>
@@ -292,7 +344,7 @@
                 text-align: start !important;
               "
             >
-              {{scope.row.product_name}}
+              {{ scope.row.product_name }}
             </span>
           </template>
         </el-table-column>
@@ -315,7 +367,7 @@
               placement="top-start"
               min-width="200%"
               trigger="hover"
-              content="aaaaaaaaaaaaaa"
+              :content="scope.row.product_specs"
             >
               <span
                 slot="reference"
@@ -325,7 +377,7 @@
                   text-align: start !important;
                 "
               >
-                {{scope.row.procudt_specs}}
+                {{ scope.row.product_specs }}
               </span>
             </el-popover>
           </template>
@@ -507,6 +559,33 @@
             </template>
           </el-table-column>
           <el-table-column
+            label="产品单价"
+            align="center"
+            width="160"
+            class-name="li"
+          >
+            <template slot-scope="scope">
+              <el-popover
+                placement="top-start"
+                min-width="200%"
+                trigger="hover"
+                content="scope.row.address"
+              >
+                <span
+                  class="threeLine"
+                  slot="reference"
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
+                  "
+                >
+                  asv
+                </span>
+              </el-popover>
+            </template>
+          </el-table-column>
+          <el-table-column
             label="产品总价"
             align="center"
             width="160"
@@ -593,7 +672,7 @@
         <el-table-column
           align="center"
           label="订单号"
-          min-width="200"
+          width="200"
           class-name="li"
         >
           <template slot-scope="scope">
@@ -698,7 +777,7 @@
         </el-table-column>
         <el-table-column
           align="center"
-          label="出库数"
+          label="产品总价"
           width="90"
           class-name="more"
         >
@@ -714,6 +793,25 @@
                   1000000
                   {{ scope.$index }}
                 </template>
+              </el-table-column>
+            </el-table>
+          </template>
+        </el-table-column>
+        <el-table-column
+          align="center"
+          label="出库数"
+          width="90"
+          class-name="more"
+        >
+          <template slot-scope="scope">
+            <el-table
+              fit
+              :data="list"
+              :show-header="false"
+              :row-style="{ height: '126px' }"
+            >
+              <el-table-column class-name="li">
+                <template slot-scope="scope"> 100000 </template>
               </el-table-column>
             </el-table>
           </template>
@@ -734,28 +832,6 @@
               <el-table-column class-name="li">
                 <template slot-scope="scope">
                   10000
-                  {{ scope.$index }}
-                </template>
-              </el-table-column>
-            </el-table>
-          </template>
-        </el-table-column>
-        <el-table-column
-          align="center"
-          label="产品总价"
-          width="90"
-          class-name="more"
-        >
-          <template slot-scope="scope">
-            <el-table
-              fit
-              :data="list"
-              :show-header="false"
-              :row-style="{ height: '126px' }"
-            >
-              <el-table-column class-name="li">
-                <template slot-scope="scope">
-                  1000000
                   {{ scope.$index }}
                 </template>
               </el-table-column>
@@ -911,9 +987,10 @@
 </template>
 
 <script>
-import { getList, getProductList } from "@/api/table";
+import { getList, getProductList,addOrder } from "@/api/table";
 import Search from "@/components/Search/index.vue";
 import throttle from "lodash/throttle";
+import cloneDeep from 'lodash/cloneDeep';
 
 export default {
   components: {
@@ -935,6 +1012,8 @@ export default {
       list: [{ id: 0 }, { id: 1 }],
       listLoading: false,
       productsList: [],
+      beforeList:[],
+      addProductsList: [],
       //
       order: "desc",
       page_current: 1,
@@ -948,6 +1027,8 @@ export default {
       //添加的单价
       perValue: [],
       perNum: [],
+      //
+      isEdit:false,
       //#region
       //产品信息抽屉
       // drawer: false,
@@ -1048,15 +1129,37 @@ export default {
   mounted() {
     this.$bus.$on("add", this.addOpenDrawer);
     this.$bus.$on("select", this.selectOpenDrawer);
+    this.$bus.$on("goSearch", this.search);
     this.$bus.$on("determine", this.sendOrder);
   },
   beforeDestroy() {
     this.$bus.$off();
   },
   methods: {
+    search(searchInfo) {},
     //添加的确定按钮
     sendOrder(a) {
       console.log("@", this.perValue, this.perNum, a);
+      console.log('@@',this.addProductsList);
+      let products ={};
+      for (const iterator of this.addProductsList) {
+        let arr=[];
+        
+      }
+      let data = new FormData();
+      // data.append('customer_id',a.id);
+      // data.append('order_number',);
+      // data.append('project_name',);
+      // data.append('work_order_number',);
+      // data.append('product_orders',);
+      // data.append('product_id',);
+      // data.append('price',);
+      // data.append('number',);
+      // data.append('order_image',);
+
+      // addOrder().then(()=>{
+
+      // });
     },
     pageChange(current) {
       this.page_current = current;
@@ -1064,31 +1167,34 @@ export default {
     sizeChange(size) {
       this.page_size = size;
     },
-    //添加
+    //添加编辑抽屉开关
     addOpenDrawer() {
       this.visibleAdd = true;
     },
     closeAddDrawer() {
+      this.isEdit=false;
       this.visibleAdd = false;
     },
     //产品选择
     selectOpenDrawer(customer_id) {
       getProductList(customer_id).then((res) => {
         this.productsList = res.data.res;
-      this.visibleProductions = true;
+        this.visibleProductions = true;
       });
     },
     closeSelectDrawer() {
-      let a = this.$refs.search.sendInfo();
-      console.log("@@@", a);
+      // let a = this.$refs.search.sendInfo();
+      this.addProductsList = cloneDeep(this.beforeList)
+      // this.addProductsList = this.beforeList;
       this.visibleProductions = false;
     },
     //获取产品序号
     selectChange(val) {
-      console.log(val);
+      this.beforeList.unshift(...val);
     },
     //点击编辑
     edit() {
+      this.isEdit = true;
       this.addOpenDrawer();
     },
     //打开订单信息的抽屉
@@ -1224,7 +1330,7 @@ export default {
       overflow: auto !important;
       .el-drawer__body {
         // margin: 10px;
-        padding: 20px;
+        padding:0 20px;
       }
     }
   }
@@ -1260,8 +1366,11 @@ export default {
   }
 }
 .details {
+  .el-drawer {
+    min-width: 1400px;
+  }
   .el-drawer__body {
-    padding: 20px;
+    padding:0 20px;
   }
 }
 </style>

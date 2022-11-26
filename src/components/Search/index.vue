@@ -7,6 +7,18 @@
         :style="{ maxHeight: search.length < 6 ? '84px' : 'none' }"
       >
         <div v-for="(item, index) in search" :key="index" class="input">
+          <div v-if="item.type == 'select'" class="select">
+            <div class="leftName">{{ item.title }}</div>
+            <el-select v-model="searchInfo[index]" placeholder="请选择">
+              <el-option
+                v-for="item in selectInfo"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </div>
           <div
             v-if="item.type == 'file'"
             style="
@@ -23,18 +35,26 @@
                 background-color: #409eff;
                 position: relative;
                 color: #fff;
+                font-size: 14px;
                 border: 0;
                 border-right: 1px solid #dcdfe6;
               "
             >
-              选择订单图片
+              {{ item.title }}
             </button>
             <span
-              style="height: 100%; width: 100%; position: absolute; left: 124px;color:#606266;"
+              style="
+                height: 100%;
+                width: 100%;
+                position: absolute;
+                left: 124px;
+                color: #606266;
+              "
             >
               {{ fileName }}
             </span>
             <input
+              :disabled="item.disabled"
               class="file"
               type="file"
               @change="showName(index)"
@@ -53,6 +73,7 @@
               :placeholder="item.placeholder"
               class="input-el"
               v-model="searchInfo[index]"
+              :disabled="item.disabled"
             >
               <template slot="prepend">{{ item.title }}</template>
             </el-input>
@@ -96,6 +117,7 @@
               客户名称
             </div>
             <el-autocomplete
+              :disabled="item.disabled"
               class="inline-input"
               v-model="searchInfo[index]"
               :fetch-suggestions="querySearch"
@@ -154,15 +176,13 @@ export default {
         return [];
       },
     },
+    selectInfo: {
+      type: Array,
+      default: () => {
+        return [];
+      },
+    },
   },
-  /**
-   * search:[
-   *  {
-   *    title:'客户名'，
-   *    type:'input',
-   * }
-   * ]
-   */
   mounted() {
     // this.searchInfo = this.info;
     this.$bus.$on("edit", this.copy);
@@ -212,26 +232,34 @@ export default {
           {
             getCompanyList(this.searchInfo[0]).then((res) => {
               // this.searchInfo[0]=res.data.res[0].id
-              this.$bus.$emit("determine", {
-                info: this.searchInfo,
-                id: this.selectId,
-                info0: res.data.res[0].id,
-              });
+              if (!res.data.res[0]) {
+                this.$message({
+                  message: "客户名不存在",
+                  type: "error",
+                });
+              } else {
+                this.$bus.$emit("determine", {
+                  info: this.searchInfo,
+                  id: this.selectId,
+                  info0: res.data.res[0].id,
+                });
+              }
             });
           }
           break;
-        case "选择产品":{
-          getCompanyList(this.searchInfo[0]).then((res) => {
-              // // this.searchInfo[0]=res.data.res[0].id
-              // this.$bus.$emit("determine", {
-              //   info: this.searchInfo,
-              //   id: this.selectId,
-              //   info0: res.data.res[0].id,
-              // });
-          this.$bus.$emit("select",res.data.res[0].id);
-
+        case "选择产品":
+          {
+            getCompanyList(this.searchInfo[0]).then((res) => {
+              if (!res.data.res[0]) {
+                this.$message({
+                  message: "客户名不存在",
+                  type: "error",
+                });
+              } else {
+                this.$bus.$emit("select", res.data.res[0].id);
+              }
             });
-        }
+          }
           break;
         default:
           break;
@@ -242,6 +270,54 @@ export default {
 </script>
 
 <style lang="scss">
+.leftName {
+  line-height: 32px;
+  padding: 0;
+  width: 120px;
+  height: 100%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  left: 0;
+  margin: 0;
+  border: 1px solid #dcdfe6;
+  font-size: 14px;
+  padding-left: 10px;
+  color: #909399;
+  background-color: #f5f7fa;
+  border-radius: 4px 0 0 4px;
+  border-right: 0;
+}
+.select {
+  height: 100%;
+  padding-left: 120px !important;
+  .el-select {
+    height: 100%;
+    width: 100%;
+    .el-input {
+      width: 100%;
+      height: 100%;
+      input {
+        // padding-left:120px;
+        border-radius: 0 4px 4px 0;
+      }
+      .el-input__inner {
+        height: 100%;
+      }
+      .el-input__suffix {
+        border: 0;
+        right: 0;
+        &-inner {
+          // height: 100%;
+          top: -4px;
+          border: 0;
+          right: 0;
+          left: unset;
+        }
+      }
+    }
+  }
+}
 .com {
   height: 100%;
   display: flex;

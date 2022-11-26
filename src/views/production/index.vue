@@ -33,7 +33,7 @@
       class="addProductionDrawer"
       direction="rtl"
       size="60%"
-      :title="isEdit?'编辑':'添加产品'"
+      :title="isEdit ? '编辑' : '添加产品'"
       :visible.sync="visibleDialog"
       @close="closeAddDrawer"
     >
@@ -178,9 +178,7 @@
                   text-align: start !important;
                 "
               >
-                {{
-                  scope.row.part_number
-                }}
+                {{ scope.row.part_number }}
                 <!-- IE-10-131-001-A -->
               </span>
             </template>
@@ -206,9 +204,7 @@
                     text-align: start !important;
                   "
                 >
-                  {{
-                     scope.row.name
-                  }}
+                  {{ scope.row.name }}
                   <!-- UVA-UVC-杀菌灯-铝基板-PCB -->
                 </span>
               </el-popover>
@@ -228,7 +224,7 @@
                 :content="scope.row.specs"
               >
                 <span
-                class="threeLine"
+                  class="threeLine"
                   slot="reference"
                   style="
                     display: flex;
@@ -236,9 +232,7 @@
                     text-align: start !important;
                   "
                 >
-                  {{
-                    scope.row.specs
-                  }}
+                  {{ scope.row.specs }}
                   <!-- UVA-UVC-杀菌灯
                   260-280nm-395-405nm-3.5x3.5x1.41mm-3-6W-5-7V-3.0-3.4V-40-100mA -->
                 </span>
@@ -252,9 +246,7 @@
             class-name="li"
           >
             <template slot-scope="scope">
-              {{
-                scope.row.phr
-              }}
+              {{ scope.row.phr }}
             </template>
           </el-table-column>
           <el-table-column
@@ -268,10 +260,10 @@
                 placement="top-start"
                 min-width="200%"
                 trigger="hover"
-                :content=" scope.row.position_code"
+                :content="scope.row.position_code"
               >
                 <span
-                class="threeLine"
+                  class="threeLine"
                   slot="reference"
                   style="
                     display: flex;
@@ -279,9 +271,7 @@
                     text-align: start !important;
                   "
                 >
-                  {{
-                    scope.row.position_code
-                  }}
+                  {{ scope.row.position_code }}
                   <!-- UVA-UVC-杀菌灯 -->
                 </span>
               </el-popover>
@@ -301,7 +291,7 @@
                 :content="scope.row.supplier"
               >
                 <span
-                class="threeLine"
+                  class="threeLine"
                   slot="reference"
                   style="
                     display: flex;
@@ -309,9 +299,7 @@
                     text-align: start !important;
                   "
                 >
-                  {{
-                    scope.row.supplier
-                  }}
+                  {{ scope.row.supplier }}
                   <!-- 浙江锦顺 -->
                 </span>
               </el-popover>
@@ -333,9 +321,7 @@
                   text-align: start !important;
                 "
               >
-                {{
-                  scope.row.supplier_code
-                }}
+                {{ scope.row.supplier_code }}
                 <!-- IE-10-131-001-A -->
               </span>
             </template>
@@ -362,10 +348,7 @@
                     text-align: start !important;
                   "
                 >
-                  {{
-                   
-                    scope.row.remarks
-                  }}
+                  {{ scope.row.remarks }}
                   <!-- {{ scope.row.id }} -->
                 </span>
               </el-popover>
@@ -388,16 +371,16 @@
           <div>客户名称</div>
           <div>{{ infoList.customer_name }}</div>
         </div>
-        <div style="width:16.5%">
+        <div style="width: 16.5%">
           <div>客户料号</div>
           <div>{{ infoList.customer_code }}</div>
         </div>
-        <div style="width:16.5%">
+        <div style="width: 16.5%">
           <div>产品料号</div>
           <div>{{ infoList.product_code }}</div>
         </div>
-        
-        <div style="width:20%">
+
+        <div style="width: 20%">
           <div>产品规格</div>
           <div>
             {{ infoList.product_specs }}
@@ -407,11 +390,11 @@
           <div>产品名称</div>
           <div>{{ infoList.product_name }}</div>
         </div>
-        <div style="width:30%">
+        <div style="width: 30%">
           <div>描述</div>
           <div>{{ infoList.desc }}</div>
         </div>
-        <div style="width:35%">
+        <div style="width: 35%">
           <div>备注</div>
           <div>{{ infoList.remarks }}</div>
         </div>
@@ -1007,7 +990,7 @@ export default {
   },
   data() {
     return {
-      submit:0,
+      submit: 0,
       editSend: 0,
       propInfo: null,
       length: null,
@@ -1136,10 +1119,25 @@ export default {
       this.searchIn = a.info;
       this.searchI = a.id;
       if (!this.isEdit) {
-        if(this.submit==0){
-        addProduction(a.info, a.id).then((res) => {
-          this.submit=1;
-          this.id = res.data.product_id;
+        if (this.submit == 0) {
+          addProduction(a.info, a.id).then((res) => {
+            this.submit = 1;
+            this.id = res.data.product_id;
+            const file = document.querySelector(".el-upload__input");
+            const target = file.files[0];
+            let data = new FormData();
+            data.append("product_bom", target);
+            data.append("product_id", this.id);
+            data.append("flag", this.editSend);
+            if (file.files.length > 0) {
+              addBOM(data).then((res) => {
+                this.bomList = res.data;
+
+                // this.closeAddDrawer();
+              });
+            }
+          });
+        } else {
           const file = document.querySelector(".el-upload__input");
           const target = file.files[0];
           let data = new FormData();
@@ -1149,25 +1147,10 @@ export default {
           if (file.files.length > 0) {
             addBOM(data).then((res) => {
               this.bomList = res.data;
-              
               // this.closeAddDrawer();
             });
           }
-        });
-      }else{
-          const file = document.querySelector(".el-upload__input");
-          const target = file.files[0];
-          let data = new FormData();
-          data.append("product_bom", target);
-          data.append("product_id", this.id);
-          data.append("flag", this.editSend);
-          if (file.files.length > 0) {
-            addBOM(data).then((res) => {
-              this.bomList = res.data;
-              // this.closeAddDrawer();
-            });
-          }
-      }
+        }
       } else {
         const file = document.querySelector(".el-upload__input");
         const target = file.files[0];
@@ -1178,7 +1161,7 @@ export default {
         if (file.files.length > 0) {
           addBOM(data).then((res) => {
             this.bomList = res.data;
-            
+
             // if(this.bomList.length!=this.length){
             //   this.$message({
             //     message:'请勿传输相同的表格',
@@ -1232,7 +1215,7 @@ export default {
       this.visibleDialog = true;
     },
     closeAddDrawer() {
-      this.submit =0;
+      this.submit = 0;
       this.editSend = 0;
       this.productionInfo = {
         companyName: "",

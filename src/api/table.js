@@ -235,15 +235,7 @@ export function deleteProduction(id){
 }
 //
 //-----------------------------------------------------------------
-//获取所有库存信息
-export function getDepotList(){
-  return request({
-    url:'',
-    method:'post',
-    data:''
-  })
-}
-//获取产品信息
+//获取产品列表信息
 export function getProductList(params){
   return request({
     url:"/admin/product/getCustomerProduct",
@@ -251,6 +243,14 @@ export function getProductList(params){
     params:{
       customer_id:params
     }
+  })
+}
+//添加订单
+export function addOrder(){
+  return request({
+    url:"",
+    method:'post',
+    data:''
   })
 }
 //删除库存
