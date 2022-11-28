@@ -32,7 +32,7 @@ export default {
   // height:30px!important;
   // display:flex;
   position: relative;
-  div{
+  & > div{
     // padding-top: 10px;
     position: absolute;
     top: 0;

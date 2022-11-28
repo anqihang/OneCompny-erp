@@ -53,6 +53,7 @@
             >
               {{ fileName }}
             </span>
+            <!-- <span style="width:220px;border:0;overflow:hidden;position:absolute;left:120px;">{{infos[index]}}</span> -->
             <input
               :disabled="item.disabled"
               class="file"
@@ -73,7 +74,7 @@
               :placeholder="item.placeholder"
               class="input-el"
               v-model="searchInfo[index]"
-              :disabled="item.disabled"
+              :readonly="item.disabled"
             >
               <template slot="prepend">{{ item.title }}</template>
             </el-input>
@@ -117,7 +118,7 @@
               客户名称
             </div>
             <el-autocomplete
-              :disabled="item.disabled"
+              :readonly="item.disabled"
               class="inline-input"
               v-model="searchInfo[index]"
               :fetch-suggestions="querySearch"
@@ -132,6 +133,7 @@
         <el-button  style="height:30px;margin-left: 5px;margin-bottom: 5px;" size="small" @click="searchInfo=[]">重置</el-button> -->
     </div>
     <div class="title__right">
+      <!-- <img src="" alt="" ref="img" /> -->
       <div class="button">
         <el-button
           :type="item.type"
@@ -159,6 +161,7 @@ export default {
       searchInfo: [],
       selectId: null,
       fileName: null,
+      infos:null,
     };
   },
   props: {
@@ -191,10 +194,33 @@ export default {
     showName(index) {
       let fi = document.querySelector(".file");
       this.fileName = fi.files[0].name;
-      this.searchInfo[index] = fi.files[0];
+      let file = fi.files[0];
+      // for (const iterator of this.searchInfo) {
+      //   if (iterator instanceof File) {
+      //     file = iterator;
+      //   }
+      // }
+      if (fi.files[0].type.split("/")[0] == "image") {
+
+        if (file.size > 1024 * 1024) {
+          this.compressImg(file, 0.2).then((res) => {
+            // console.log('@',res);
+            // this.$refs.img.src = window.URL.createObjectURL(res.file);
+            this.searchInfo[index] = res.file;
+          });
+        }else{
+          this.searchInfo[index] = fi.files[0];
+        }
+      }else{
+        this.searchInfo[index] = fi.files[0];
+      }
     },
     copy(info) {
+      this.infos=info;
       this.searchInfo = info;
+      let fi = document.querySelector(".file");
+      fi.value='';
+      console.log(fi.value);
     },
     sendInfo() {
       return { info: this.searchInfo, id: this.selectId };
@@ -213,7 +239,98 @@ export default {
     handleSelect(select) {
       this.selectId = select.id;
     },
-
+    //图片压缩
+    compressImg(file, quality) {
+      if (file[0]) {
+        return Promise.all(
+          Array.from(file).map((e) => compressImg(e, quality))
+        ); // 如果是 file 数组返回 Promise 数组
+      } else {
+        return new Promise((resolve) => {
+          const reader = new FileReader(); // 创建 FileReader
+          reader.onload = ({ target: { result: src } }) => {
+            const image = new Image(); // 创建 img 元素
+            image.onload = async () => {
+              const canvas = document.createElement("canvas"); // 创建 canvas 元素
+              canvas.width = image.width;
+              canvas.height = image.height;
+              canvas
+                .getContext("2d")
+                .drawImage(image, 0, 0, image.width, image.height); // 绘制 canvas
+              const canvasURL = canvas.toDataURL("image/jpeg", quality);
+              const buffer = atob(canvasURL.split(",")[1]);
+              let length = buffer.length;
+              const bufferArray = new Uint8Array(new ArrayBuffer(length));
+              while (length--) {
+                bufferArray[length] = buffer.charCodeAt(length);
+              }
+              const miniFile = new File([bufferArray], file.name, {
+                type: "image/jpeg",
+              });
+              resolve({
+                file: miniFile,
+                origin: file,
+                beforeSrc: src,
+                afterSrc: canvasURL,
+                beforeKB: Number((file.size / 1024).toFixed(2)),
+                afterKB: Number((miniFile.size / 1024).toFixed(2)),
+              });
+            };
+            image.src = src;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    },
+    // imageCompression() {
+    //   let formData=new FormData();
+    //   let rander = new FileReader();
+    //   let file;
+    //   for (const iterator of this.searchInfo) {
+    //     if (iterator instanceof File) {
+    //       file = iterator;
+    //     }
+    //   }
+    //   // console.log(file);
+    //   rander.readAsDataURL(file);
+    //   rander.onload=function(e){
+    //     let img = new Image();
+    //     img.src = this.result;
+    //     let quality = 0.3;
+    //     const canvas = document.createElement('canvas');
+    //     const drawer = canvas.getContext('2d');
+    //     //压缩
+    //     img.onload=function(){
+    //       canvas.width=img.width;
+    //       canvas.height=img.height;
+    //       drawer.drawImage(this,0,0,canvas.width,canvas.height);
+    //       let cu =canvas.toDataURL(file.type,quality);
+    //       console.log(cu);
+    //       let newFile = this.convertBase64UrlToBlob(canvas.toDataURL(file.type,quality),function(blob){
+    //         let compresFile = new File([blob],file.name,{
+    //           type:file.type
+    //         })
+    //       });
+    //       formData.append('newFile',newFile);
+    //       console.log('new',newFile);
+    //      console.log(formData);
+    //     }
+    //   }
+    // },
+    // convertBase64UrlToBlob(urlData,callback){
+    //   const arr = urlData.split(',');
+    //   const mime = arr[0].match(/:(.*?);/)[1];
+    //   const bstr = atob(arr[1]);
+    //   let length = bstr.length;
+    //   const u8arr = new Uint8Array(length)
+    //   while(length--){
+    //     u8arr[length]=bstr.charCodeAt(length);
+    //   }
+    //   callback(new Blob([u8arr],{
+    //     type:mime
+    //   }));
+    // },
+    //
     clickAtt(name) {
       switch (name) {
         case "添加":

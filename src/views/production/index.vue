@@ -1297,7 +1297,6 @@ export default {
       const target = file.files[0];
       let data = new FormData();
       data.append("product_bom", target);
-      console.log("@@@@", this.id);
       data.append("product_id", this.id);
       this.FlistLoading = true;
       if (this.isEdit) {

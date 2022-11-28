@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container order">
+  <div class="app-container order" v-loading.lock="FlistLoading">
     <Search
       :search="[
         { title: '客户名称', type: 'input' },
@@ -32,19 +32,20 @@
       :visible.sync="visibleAdd"
       direction="rtl"
       size="70%"
-      :title="isEdit?'编辑订单':'添加订单'"
+      :title="isEdit ? '编辑订单' : '添加订单'"
       style="min-width: 1400px"
       @close="closeAddDrawer"
+      @opened="openEdit"
     >
       <Search
         ref="search"
         :search="[
-          { title: '客户名称', type: 'autocomplate',disabled:isEdit },
-          { title: '订单号', type: 'input',disabled:isEdit },
-          { title: '订单PDF图片', type: 'file',disabled:isEdit },
-          { title: '项目名称', type: 'input' ,disabled:isEdit},
-          { title: '工单号', type: 'input' ,disabled:isEdit},
-          { title: '备注', type: 'input',disabled:isEdit },
+          { title: '客户名称', type: 'autocomplate', disabled: isEdit },
+          { title: '订单号', type: 'input', disabled: isEdit },
+          { title: '订单PDF图片', type: 'file', disabled: isEdit },
+          { title: '项目名称', type: 'input', disabled: isEdit },
+          { title: '工单号', type: 'input', disabled: isEdit },
+          { title: '备注', type: 'input', disabled: isEdit },
         ]"
         :button="[
           { title: '确定', type: 'primary' },
@@ -62,7 +63,7 @@
           "
         >
           <div>产品</div>
-          <div style="width: 250px">订单总价：11111111</div>
+          <div>订单总价：{{ totalPrice }}</div>
         </div>
         <div class="inpu">
           <el-table
@@ -177,7 +178,7 @@
               </template>
             </el-table-column>
             <el-table-column
-            v-if="!isEdit"
+              v-if="!isEdit"
               label="产品单价"
               align="center"
               min-width="100"
@@ -192,15 +193,13 @@
               </template>
             </el-table-column>
             <el-table-column
-            v-if="isEdit"
+              v-if="isEdit"
               label="产品单价"
               align="center"
               min-width="100"
               class-name="li"
             >
-              <template slot-scope="scope">
-                10
-              </template>
+              <template slot-scope="scope"> {{ scope.row.price }} </template>
             </el-table-column>
             <el-table-column
               label="数量"
@@ -222,7 +221,11 @@
               class-name="li"
             >
               <template slot-scope="scope">
-                {{ perValue[scope.$index] * perNum[scope.$index] }}
+                {{
+                  isEdit
+                    ? perNum[scope.$index] * scope.row.price
+                    : perValue[scope.$index] * perNum[scope.$index]
+                }}
               </template>
             </el-table-column>
             <el-table-column
@@ -241,7 +244,7 @@
                   title="确定删除吗？"
                   icon="el-icon-info"
                   icon-color="red"
-                  @onConfirm=""
+                  @onConfirm="deleteProduct(scope.row)"
                 >
                   <el-button type="danger" size="small" slot="reference">
                     删除
@@ -249,7 +252,7 @@
                 </el-popconfirm>
                 <el-button type="info" size="small"></el-button>
                 <el-button type="info" size="small"></el-button>
-                
+
                 <el-button type="info" size="small"></el-button>
                 <el-button type="info" size="small"></el-button>
               </template>
@@ -265,7 +268,6 @@
       title="产品列表"
       size="60%"
       style="min-width: 1300px"
-      @close="closeSelectDrawer"
       direction="rtl"
     >
       <el-button
@@ -394,25 +396,25 @@
       @close="closeDetails"
     >
       <div style="display: flex; flex-wrap: wrap" class="info">
-        <div>
+        <div style="width: 25%">
           <div>客户名称</div>
-          <div>ds</div>
+          <div>{{ productInfoList.company_name }}</div>
         </div>
-        <div>
+        <div style="width: 25%">
           <div>订单号</div>
-          <div>sdv</div>
+          <div>{{ productInfoList.order_number }}</div>
         </div>
-        <div>
+        <div style="width: 25%">
           <div>订单总价</div>
-          <div>ds</div>
+          <div>{{ productInfoList.total_price }}</div>
         </div>
-        <div>
+        <div style="width: 25%">
           <div>订单状态</div>
-          <div>v</div>
+          <div>{{ productInfoList.status == 0 ? "进行中" : "已完成" }}</div>
         </div>
         <div>
           <div>备注</div>
-          <div>a</div>
+          <div>{{ productInfoList.remarks }}</div>
         </div>
       </div>
       <div
@@ -435,7 +437,7 @@
           border
           stripe
           highlight-current-row
-          :data="list"
+          :data="productInfoList.order_infos"
           :row-style="{ height: '100px' }"
           :header-cell-style="{ height: '40px' }"
         >
@@ -465,7 +467,7 @@
                   text-align: start !important;
                 "
               >
-                fasds
+                {{ scope.row.customer_code }}
               </span>
             </template>
           </el-table-column>
@@ -491,7 +493,7 @@
                     text-align: start !important;
                   "
                 >
-                  dvadsv
+                  {{ scope.row.product_code }}
                 </span>
               </el-popover>
             </template>
@@ -518,7 +520,7 @@
                     text-align: start !important;
                   "
                 >
-                  vasvas
+                  {{ scope.row.product_name }}
                 </span>
               </el-popover>
             </template>
@@ -580,7 +582,7 @@
                     text-align: start !important;
                   "
                 >
-                  asv
+                  {{ scope.row.price }}
                 </span>
               </el-popover>
             </template>
@@ -607,7 +609,7 @@
                     text-align: start !important;
                   "
                 >
-                  asv
+                  {{ scope.row.price * scope.row.number }}
                 </span>
               </el-popover>
             </template>
@@ -645,8 +647,8 @@
       >
         <el-table-column align="center" label="序号" width="50" class-name="li">
           <template slot-scope="scope">
-            <!-- {{ scope.$index }} -->
-            100
+            {{ scope.$index }}
+            <!-- 100 -->
           </template>
         </el-table-column>
         <el-table-column
@@ -665,7 +667,8 @@
                 text-align: start !important;
               "
             >
-              深圳市艾联特电子科技有限公司
+              {{ scope.row.company_name }}
+              <!-- 深圳市艾联特电子科技有限公司 -->
             </span>
           </template>
         </el-table-column>
@@ -685,8 +688,8 @@
                 text-align: start !important;
               "
             >
-              {{ scope.$index + 1 }}
-
+              <!-- {{ scope.$index + 1 }} -->
+              {{ scope.row.order_number }}
               <!-- QG-E-RES-0010-iNNO-1 -->
             </span>
           </template>
@@ -700,13 +703,13 @@
           <template slot-scope="scope">
             <!-- {{scope.$index}} -->
             <el-table
-              :data="list"
+              :data="scope.row.order_infos"
               :show-header="false"
               :row-style="{ height: '126px' }"
             >
               <el-table-column class-name="li">
-                <template slot-scope="scope">
-                  {{ scope.$index }}
+                <template slot-scope="scope1">
+                  {{ scope1.row.customer_code }}
                 </template>
               </el-table-column>
             </el-table>
@@ -721,14 +724,13 @@
           <template slot-scope="scope">
             <el-table
               fit
-              :data="list"
+              :data="scope.row.order_infos"
               :show-header="false"
               :row-style="{ height: '126px' }"
             >
               <el-table-column class-name="li">
-                <template slot-scope="scope">
-                  PCBA-全格-蓝牙版-UVC-杀菌灯板
-                  {{ scope.$index }}
+                <template slot-scope="scope1">
+                  {{ scope1.row.product_code }}
                 </template>
               </el-table-column>
             </el-table>
@@ -743,14 +745,13 @@
           <template slot-scope="scope">
             <el-table
               fit
-              :data="list"
+              :data="scope.row.order_infos"
               :show-header="false"
               :row-style="{ height: '126px' }"
             >
               <el-table-column class-name="li">
-                <template slot-scope="scope">
-                  PCBA-全格-蓝牙版-UVC-杀菌灯板
-                  {{ scope.$index }}
+                <template slot-scope="scope1">
+                  {{ scope1.row.product_name }}
                 </template>
               </el-table-column>
             </el-table>
@@ -765,12 +766,14 @@
           <template slot-scope="scope">
             <el-table
               fit
-              :data="list"
+              :data="scope.row.order_infos"
               :show-header="false"
               :row-style="{ height: '126px' }"
             >
               <el-table-column class-name="li">
-                <template slot-scope="scope"> 1000 </template>
+                <template slot-scope="scope1">
+                  {{ scope1.row.number }}
+                </template>
               </el-table-column>
             </el-table>
           </template>
@@ -784,14 +787,13 @@
           <template slot-scope="scope">
             <el-table
               fit
-              :data="list"
+              :data="scope.row.order_infos"
               :show-header="false"
               :row-style="{ height: '126px' }"
             >
               <el-table-column class-name="li">
-                <template slot-scope="scope">
-                  1000000
-                  {{ scope.$index }}
+                <template slot-scope="scope1">
+                  {{ scope1.row.price * scope1.row.number }}
                 </template>
               </el-table-column>
             </el-table>
@@ -806,7 +808,7 @@
           <template slot-scope="scope">
             <el-table
               fit
-              :data="list"
+              :data="scope.row.order_infos"
               :show-header="false"
               :row-style="{ height: '126px' }"
             >
@@ -825,14 +827,14 @@
           <template slot-scope="scope">
             <el-table
               fit
-              :data="list"
+              :data="scope.row.order_infos"
               :show-header="false"
               :row-style="{ height: '126px' }"
             >
               <el-table-column class-name="li">
                 <template slot-scope="scope">
                   10000
-                  {{ scope.$index }}
+                  <!-- {{ scope.$index }} -->
                 </template>
               </el-table-column>
             </el-table>
@@ -844,7 +846,7 @@
           width="100"
           class-name="li"
         >
-          <template slot-scope="scope"> 10000</template>
+          <template slot-scope="scope"> {{ scope.row.total_price }}</template>
         </el-table-column>
         <el-table-column
           label="订单状态"
@@ -853,24 +855,18 @@
           class-name="li"
         >
           <template slot-scope="scope">
-            <el-popover
-              placement="top-start"
-              min-width="200%"
-              trigger="hover"
-              content="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaassssssssssssssssssssssssaaaaaaaaaaaaaaa"
+            <span
+              slot="reference"
+              style="
+                display: flex;
+                justify-content: start;
+                text-align: start !important;
+              "
             >
-              <span
-                class="threeLine"
-                slot="reference"
-                style="
-                  display: flex;
-                  justify-content: start;
-                  text-align: start !important;
-                "
-              >
-                完成中啊啊
-              </span>
-            </el-popover>
+              <el-tag :type="scope.row.status | statusFilter">{{
+                scope.row.status == 0 ? "进行中" : "已完成"
+              }}</el-tag>
+            </span>
           </template>
         </el-table-column>
         <el-table-column
@@ -880,24 +876,23 @@
           class-name="li"
         >
           <template slot-scope="scope">
-            <el-popover
-              placement="top-start"
-              min-width="200%"
-              trigger="hover"
-              content="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaassssssssssssssssssssssssaaaaaaaaaaaaaaa"
-            >
-              <span
-                class="threeLine"
-                slot="reference"
-                style="
-                  display: flex;
-                  justify-content: start;
-                  text-align: start !important;
-                "
-              >
-                完成中啊啊
-              </span>
-            </el-popover>
+            <!-- <span
+              slot="reference"
+              style="
+                display: flex;
+                justify-content: start;
+                text-align: start !important;
+              "
+            > -->
+            <el-image
+              style="position: relative"
+              :src="'http://192.168.1.121:8080' + scope.row.order_image"
+              :preview-src-list="[
+                'http://192.168.1.121:8080' + scope.row.order_image,
+              ]"
+            ></el-image>
+            <!-- {{scope.row.order_image}} -->
+            <!-- </span> -->
           </template>
         </el-table-column>
         <el-table-column
@@ -922,7 +917,7 @@
                   text-align: start !important;
                 "
               >
-                完成中啊啊
+                {{ scope.row.remarks }}
               </span>
             </el-popover>
           </template>
@@ -930,13 +925,13 @@
         <el-table-column
           align="center"
           prop="created_at"
-          label="下单时间"
+          label="创建时间"
           width="170"
           class-name="li"
         >
           <template slot-scope="scope">
             <i class="el-icon-time" />
-            <span>{{ scope.row.display_time }}</span>
+            <span>{{ scope.row.create_time }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -947,10 +942,10 @@
           class-name="button orderButton"
         >
           <template slot-scope="scope" style="display: flex; flex-wrap: wrap">
-            <el-button type="primary" size="small" @click="details"
+            <el-button type="primary" size="small" @click="details(scope.row)"
               >订单信息</el-button
             >
-            <el-button type="primary" size="small" @click="edit"
+            <el-button type="primary" size="small" @click="edit(scope.row)"
               >编辑</el-button
             >
             <el-button type="info" size="small"></el-button>
@@ -958,6 +953,7 @@
               title="确定删除吗？"
               icon="el-icon-info"
               icon-color="red"
+              @onConfirm="deleteOrder(scope.row)"
             >
               <el-button type="danger" size="small" slot="reference">
                 删除
@@ -987,12 +983,29 @@
 </template>
 
 <script>
-import { getList, getProductList,addOrder } from "@/api/table";
+import {
+  getList,
+  getProductList,
+  addOrder,
+  getOrderList,
+  getOrderInfo,
+  deleteOrder,
+  editOrder,
+} from "@/api/table";
 import Search from "@/components/Search/index.vue";
 import throttle from "lodash/throttle";
-import cloneDeep from 'lodash/cloneDeep';
+import cloneDeep from "lodash/cloneDeep";
 
 export default {
+  filters: {
+    statusFilter(status) {
+      const statusMap = {
+        0: "success",
+        1: "gray",
+      };
+      return statusMap[status];
+    },
+  },
   components: {
     Search,
   },
@@ -1008,12 +1021,19 @@ export default {
   },
   data() {
     return {
+      imglist: [
+        "http://192.168.1.121:8080/uploads/images/20221126/20221126143059778.jpg",
+      ],
       //展示的list
       list: [{ id: 0 }, { id: 1 }],
       listLoading: false,
+      FlistLoading: false,
       productsList: [],
-      beforeList:[],
+      beforeList: [],
       addProductsList: [],
+      maddProductsList: [],
+      productInfoList: [],
+
       //
       order: "desc",
       page_current: 1,
@@ -1028,7 +1048,14 @@ export default {
       perValue: [],
       perNum: [],
       //
-      isEdit:false,
+      isEdit: false,
+      row: null,
+      img: null,
+      editData: {},
+      //
+      deleteList: [],
+      addList: [],
+      totalPrice: 0,
       //#region
       //产品信息抽屉
       // drawer: false,
@@ -1123,7 +1150,22 @@ export default {
       //#endregion
     };
   },
+  computed: {
+    // totalPrice(){
+    //   let to = 0;
+    //   for (const iterator of this.addProductsList) {
+    //     to+=(iterator.number*iterator.price);
+    //   }
+    //   return to
+    // }
+  },
+  watch: {
+    // totalPrice(){
+    //   let to =0;
+    // }
+  },
   created() {
+    this.FlistLoading = true;
     this.fetchData();
   },
   mounted() {
@@ -1136,30 +1178,62 @@ export default {
     this.$bus.$off();
   },
   methods: {
-    search(searchInfo) {},
+    search(searchInfo) {
+      this.fetchData(searchInfo);
+    },
     //添加的确定按钮
     sendOrder(a) {
-      console.log("@", this.perValue, this.perNum, a);
-      console.log('@@',this.addProductsList);
-      let products ={};
-      for (const iterator of this.addProductsList) {
-        let arr=[];
-        
+      // console.log("@", this.perValue, this.perNum, a);
+      // console.log("@@@", this.addProductsList);
+      if (!this.isEdit) {
+        let products = [];
+        for (const index in this.addProductsList) {
+          let arr = {};
+          arr.product_id = this.addProductsList[index].product_id || "";
+          arr.price = this.perValue[index] || "";
+          arr.number = this.perNum[index] || "";
+          products.push(arr);
+        }
+        // console.log(a.info[2]);
+        let data = new FormData();
+        data.append("customer_id", a.id);
+        data.append("order_number", a.info[1]);
+        data.append("project_name", a.info[3] || "");
+        data.append("work_order_number", a.info[4] || "");
+        data.append("product_orders", JSON.stringify(products));
+        data.append("order_image", a.info[2] || "");
+        this.FlistLoading = true;
+        addOrder(data).then((res) => {
+          this.closeAddDrawer();
+          this.fetchData();
+          // this.FlistLoading = false;
+        });
+      } else {
+        this.editProduct();
+        let arr = [];
+        for (const index in this.addProductsList) {
+          let obj = {};
+          obj.product_id = this.addProductsList[index].product_id;
+          obj.number = this.perNum[index];
+          obj.price = this.addProductsList[index].price;
+          obj.flag = this.addProductsList[index].flag;
+          arr.push(obj);
+        }
+
+        let product_orders = [
+          ...this.deleteList,
+          ...this.addList,
+          ...arr,
+        ];
+        console.log("@@", product_orders);
+        editOrder({
+          list: product_orders,
+          da: this.editData,
+          id: a.info0,
+        }).then(() => {
+          this.closeAddDrawer();
+        });
       }
-      let data = new FormData();
-      // data.append('customer_id',a.id);
-      // data.append('order_number',);
-      // data.append('project_name',);
-      // data.append('work_order_number',);
-      // data.append('product_orders',);
-      // data.append('product_id',);
-      // data.append('price',);
-      // data.append('number',);
-      // data.append('order_image',);
-
-      // addOrder().then(()=>{
-
-      // });
     },
     pageChange(current) {
       this.page_current = current;
@@ -1170,52 +1244,170 @@ export default {
     //添加编辑抽屉开关
     addOpenDrawer() {
       this.visibleAdd = true;
+      // if(this.isEdit){
+      // }
     },
     closeAddDrawer() {
-      this.isEdit=false;
+      this.isEdit = false;
+      this.maddProductsList=[];
+      (this.row = ""), (this.img = ""), (this.addProductsList = []);
+      this.$bus.$emit("edit", []);
       this.visibleAdd = false;
+      this.totalPrice=0;
+      this.fetchData();
     },
     //产品选择
     selectOpenDrawer(customer_id) {
       getProductList(customer_id).then((res) => {
+        //  this.productsList =  res.data.res.filter((item)=>{
+        //      for (const iterator of this.productsList) {
+        //       if(iterator.product_id == item.product_id){
+        //         return true;
+        //       }
+        //     }
+        //   })
         this.productsList = res.data.res;
         this.visibleProductions = true;
       });
     },
     closeSelectDrawer() {
       // let a = this.$refs.search.sendInfo();
-      this.addProductsList = cloneDeep(this.beforeList)
-      // this.addProductsList = this.beforeList;
+      // this.addProductsList =
+      // console.log('@@@',this.addProductsList);
+      // this.addProductsList = cloneDeep(this.beforeList);
+      this.addProductsList.push(...cloneDeep(this.beforeList));
+      this.beforeList = [];
       this.visibleProductions = false;
+    },
+    deleteProduct(row) {
+      for (const index in this.addProductsList) {
+        if (this.addProductsList[index].product_id == row.product_id) {
+          this.addProductsList.splice(index, 1);
+          this.perNum.splice(index, 1);
+          this.perValue.splice(index, 1);
+        }
+      }
+      if (this.isEdit) {
+        this.deleteList.push({
+          product_id: row.product_id,
+          price: row.price,
+          number: row.number,
+          flag: 1,
+        });
+      }
     },
     //获取产品序号
     selectChange(val) {
-      this.beforeList.unshift(...val);
+      this.beforeList = val;
+      // this.beforeList.unshift(...val);
+      if (this.isEdit) {
+        for (const iterator of val) {
+          let obj ={};
+          obj.product_id = iterator.product_id;
+          obj,number = iterator.number;
+          obj.price = iterator.price;
+          this.addList.push(obj);
+        }
+        for (const iterator of this.addList) {
+          iterator.flag = 2;
+        }
+      }
     },
     //点击编辑
-    edit() {
+    edit(row) {
+      this.totalPrice = row.total_price;
+      let img = row.order_image.split("/");
+      this.img = img[img.length - 1];
       this.isEdit = true;
       this.addOpenDrawer();
+      this.row = row;
+      this.addProductsList = cloneDeep(row.order_infos);
+      this.maddProductsList = cloneDeep(row.order_infos);
+      for (const iterator of row.order_infos) {
+        this.perNum.push(iterator.number);
+      }
+
+      this.editData = {
+        order_id: row.order_id,
+        order_number: row.order_number,
+        project_name: "",
+        work_order_number: "",
+        // product_orders: row.order_infos,
+      };
+    },
+    editProduct() {
+      console.log("@", this.maddProductsList);
+
+      for (const iterator of this.maddProductsList) {
+        for (const index in this.addProductsList) {
+          if (iterator.product_id == this.addProductsList[index].product_id) {
+            // if (iterator.number != this.addProductsList[index].number) {
+            this.addProductsList[index].flag = 3;
+            // this.addProductsList[index].number = this.perNum[index];
+            // }
+          }
+        }
+      }
+    },
+    openEdit() {
+      this.$bus.$emit("edit", [
+        this.row.company_name,
+        this.row.order_number,
+        this.img,
+        "",
+        "",
+        this.row.remarks,
+      ]);
     },
     //打开订单信息的抽屉
-    details() {
+    details(row) {
+      getOrderInfo(row.order_id).then((res) => {
+        console.log("@", res);
+        this.productInfoList = res.data.res;
+      });
       this.visibleDetails = true;
     },
     closeDetails() {
       this.visibleDetails = false;
     },
+    //删除
+    deleteOrder(row) {
+      deleteOrder(row.order_id).then((res) => {
+        this.fetchData();
+      });
+    },
     //初始化
-    fetchData() {
+    fetchData(searchInfo) {
       // this.listLoading = true;
       // getList().then((response) => {
       //   this.list = response.data.items;
       //   this.listLoading = false;
       // });
+      if (!searchInfo) {
+        searchInfo = ["", "", "", "", "", "", ""];
+      }
+      this.listLoading = true;
+      getOrderList({
+        size: this.page_size,
+        current: this.page_current,
+        searchInfo,
+      }).then((res) => {
+        // console.log('@',res);
+        this.page_total = res.data.res.total;
+        this.list = res.data.res.data;
+        this.listLoading = false;
+        this.FlistLoading = false;
+      });
+      this.FlistLoading = false;
     },
   },
 };
 </script>
 <style lang="scss">
+.el-image-viewer__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+}
 .el-drawer__wrapper {
   .el-drawer__body {
     height: 100px;
@@ -1330,7 +1522,7 @@ export default {
       overflow: auto !important;
       .el-drawer__body {
         // margin: 10px;
-        padding:0 20px;
+        padding: 0 20px;
       }
     }
   }
@@ -1370,7 +1562,7 @@ export default {
     min-width: 1400px;
   }
   .el-drawer__body {
-    padding:0 20px;
+    padding: 0 20px;
   }
 }
 </style>
