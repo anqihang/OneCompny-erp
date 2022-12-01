@@ -10,6 +10,9 @@ export default {
 }
 </script>
 <style lang="scss">
+.info{
+  margin:10px!important;
+}
 .threeLine {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -33,7 +36,7 @@ export default {
   // display:flex;
   position: relative;
   & > div{
-    // padding-top: 10px;
+    // padding-top: 12px;
     position: absolute;
     top: 0;
     // padding:0!important;
@@ -44,7 +47,9 @@ export default {
   bottom: initial;
   .el-table__row {
     .button{
+      padding-top:0;
     .cell {
+      padding-top:12px;
       display: flex !important;
       flex-wrap: wrap !important;
       justify-content: center;

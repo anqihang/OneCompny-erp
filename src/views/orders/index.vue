@@ -11,9 +11,9 @@
         { title: '备注', type: 'input' },
       ]"
       :button="[
-        { title: '搜索', type: '' },
-        { title: '重置', type: '' },
-        { title: '添加', type: 'primary' },
+        { title: '搜索', type: '', if: true },
+        { title: '重置', type: '', if: true },
+        { title: '添加', type: 'primary', if: true },
       ]"
       :selectInfo="[
         {
@@ -28,6 +28,7 @@
     ></Search>
     <!-- //添加 -->
     <el-drawer
+    ref="add"
       class="orderDrawer"
       :visible.sync="visibleAdd"
       direction="rtl"
@@ -48,8 +49,8 @@
           { title: '备注', type: 'input', disabled: isEdit },
         ]"
         :button="[
-          { title: '确定', type: 'primary' },
-          { title: '选择产品', type: 'primary' },
+          { title: '确定', type: 'primary', if: true },
+          { title: '选择产品', type: 'primary', if: !isEdit },
         ]"
       ></Search>
       <div style="background-color: #f5f7fa; height: 3px; margin: 10px"></div>
@@ -417,7 +418,7 @@
           <div>{{ productInfoList.remarks }}</div>
         </div>
       </div>
-      <div
+      <!-- <div
         style="
           display: flex;
           justify-content: space-between;
@@ -428,7 +429,8 @@
           margin: 10px;
           padding: 10px 20px;
         "
-      ></div>
+      ></div> -->
+      <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0"></div>
 
       <div style="margin: 10px">
         <el-table
@@ -647,7 +649,7 @@
       >
         <el-table-column align="center" label="序号" width="50" class-name="li">
           <template slot-scope="scope">
-            {{ scope.$index }}
+            {{ scope.$index+1 }}
             <!-- 100 -->
           </template>
         </el-table-column>
@@ -780,6 +782,27 @@
         </el-table-column>
         <el-table-column
           align="center"
+          label="产品单价"
+          width="90"
+          class-name="more"
+        >
+          <template slot-scope="scope">
+            <el-table
+              fit
+              :data="scope.row.order_infos"
+              :show-header="false"
+              :row-style="{ height: '126px' }"
+            >
+              <el-table-column class-name="li">
+                <template slot-scope="scope1">
+                  {{scope1.row.price}}
+                </template>
+              </el-table-column>
+            </el-table>
+          </template>
+        </el-table-column>
+        <el-table-column
+          align="center"
           label="产品总价"
           width="90"
           class-name="more"
@@ -813,7 +836,9 @@
               :row-style="{ height: '126px' }"
             >
               <el-table-column class-name="li">
-                <template slot-scope="scope"> 100000 </template>
+                <template slot-scope="scope1"> 
+                  {{scope1.row.out_total}} 
+                </template>
               </el-table-column>
             </el-table>
           </template>
@@ -832,9 +857,8 @@
               :row-style="{ height: '126px' }"
             >
               <el-table-column class-name="li">
-                <template slot-scope="scope">
-                  10000
-                  <!-- {{ scope.$index }} -->
+                <template slot-scope="scope1">
+                 {{scope1.row.not_out_number}}
                 </template>
               </el-table-column>
             </el-table>
@@ -946,7 +970,9 @@
               >订单信息</el-button
             >
             <el-button type="primary" size="small" @click="edit(scope.row)"
-              >编辑</el-button
+              >
+              编辑
+              </el-button
             >
             <el-button type="info" size="small"></el-button>
             <el-popconfirm
@@ -1025,7 +1051,7 @@ export default {
         "http://192.168.1.121:8080/uploads/images/20221126/20221126143059778.jpg",
       ],
       //展示的list
-      list: [{ id: 0 }, { id: 1 }],
+      list: [],
       listLoading: false,
       FlistLoading: false,
       productsList: [],
@@ -1055,114 +1081,29 @@ export default {
       //
       deleteList: [],
       addList: [],
-      totalPrice: 0,
-      //#region
-      //产品信息抽屉
-      // drawer: false,
-      //添加订单弹窗
-      // visibleDialog: false,
-      //
-      //抽屉显示产品信息
-      //   productionsInfo: [
-      //     {
-      //       id: 1,
-      //       name: "产品aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaafdfsfd",
-      //       num: 13,
-      //       price: 10,
-      //       totalPrice: 130,
-      //     },
-      //     {
-      //       id: 1,
-      //       name: "产品a",
-      //       num: 13,
-      //       price: 10,
-      //       totalPrice: 130,
-      //     },
-      //   ],
-      //   //收集发送后台//编辑
-      //   ordersInfo: {
-      //     companyName: "aaa",
-      //     companyAdress: "444",
-      //     adress: "什么路",
-      //     bankAccount: "41231",
-      //     name: "333",
-      //     phone: "222",
-      //     email: "111",
-      //     productions: [0],
-      //     productionInfo: [
-      //       {
-      //         productionID: 0,
-      //         number: 10,
-      //         price: 13,
-      //         totalPrice: null,
-      //         materialNum: "12",
-      //         materialDescription: "123a",
-      //       },
-      //     ],
-      //   },
-      //   //添加时用selecct后端拿
-      //   productionList: {
-      //     0: {
-      //       id: 0,
-      //       name: "产品aaaaaaaaaaaaaaaaaaaaa",
-      //       abbr: "产品a",
-      //     },
-      //     1: {
-      //       id: 1,
-      //       name: "产品bbbbbbbbbbbbbbbbbbbb",
-      //       abbr: "产品b",
-      //     },
-      //     2: {
-      //       id: 2,
-      //       name: "产品cccccccccccccccccccc",
-      //       abbr: "产品c",
-      //     },
-      //   },
-      //   //抽屉里用/后端拿
-      //   customerProductionMaterialNum: [
-      //     {
-      //       name: "abc",
-      //       number: "123",
-      //     },
-      //     {
-      //       name: "def",
-      //       number: "456",
-      //     },
-      //     {
-      //       name: "ghi",
-      //       number: "789",
-      //     },
-      //     {
-      //       name: "jkl",
-      //       number: "101112",
-      //     },
-      //   ],
-      //   rules: {
-      //     companyName: [
-      //       { required: true, message: "请填写公司名", trigger: "blur" },
-      //       { validator: validAllChinese, trigger: "blur" },
-      //     ],
-      //     companyAdress: [
-      //       { required: true, message: "请填写公司地址", trigger: "blur" },
-      //       { validator: validAdress, trigger: "blur" },
-      //     ],
-      //   },
-      //#endregion
+      // totalPrice: 0,
     };
   },
   computed: {
-    // totalPrice(){
-    //   let to = 0;
-    //   for (const iterator of this.addProductsList) {
-    //     to+=(iterator.number*iterator.price);
-    //   }
-    //   return to
-    // }
+    totalPrice: {
+      get() {
+        if (!this.isEdit) {
+          let to = 0;
+          for (let index = 0; index < this.perNum.length; index++) {
+            to += this.perNum[index] * this.perValue[index];
+          }
+          return to;
+        }else{
+          return this.toPrice;
+        }
+      },
+      // setter(v){
+      //   return
+      // }
+    },
   },
   watch: {
-    // totalPrice(){
-    //   let to =0;
-    // }
+   
   },
   created() {
     this.FlistLoading = true;
@@ -1203,11 +1144,13 @@ export default {
         data.append("product_orders", JSON.stringify(products));
         data.append("order_image", a.info[2] || "");
         this.FlistLoading = true;
+        // if(!products){
         addOrder(data).then((res) => {
           this.closeAddDrawer();
           this.fetchData();
           // this.FlistLoading = false;
         });
+      // }
       } else {
         this.editProduct();
         let arr = [];
@@ -1220,12 +1163,7 @@ export default {
           arr.push(obj);
         }
 
-        let product_orders = [
-          ...this.deleteList,
-          ...this.addList,
-          ...arr,
-        ];
-        console.log("@@", product_orders);
+        let product_orders = [...this.deleteList, ...this.addList, ...arr];
         editOrder({
           list: product_orders,
           da: this.editData,
@@ -1244,16 +1182,19 @@ export default {
     //添加编辑抽屉开关
     addOpenDrawer() {
       this.visibleAdd = true;
+      // this.$refs.add.openThis();
       // if(this.isEdit){
       // }
+
     },
     closeAddDrawer() {
       this.isEdit = false;
-      this.maddProductsList=[];
+      this.perNum = [];
+      this.perValue = [];
+      this.maddProductsList = [];
       (this.row = ""), (this.img = ""), (this.addProductsList = []);
       this.$bus.$emit("edit", []);
       this.visibleAdd = false;
-      this.totalPrice=0;
       this.fetchData();
     },
     //产品选择
@@ -1302,9 +1243,9 @@ export default {
       // this.beforeList.unshift(...val);
       if (this.isEdit) {
         for (const iterator of val) {
-          let obj ={};
+          let obj = {};
           obj.product_id = iterator.product_id;
-          obj,number = iterator.number;
+          obj, (number = iterator.number);
           obj.price = iterator.price;
           this.addList.push(obj);
         }
@@ -1315,7 +1256,7 @@ export default {
     },
     //点击编辑
     edit(row) {
-      this.totalPrice = row.total_price;
+      this.toPrice = row.total_price;
       let img = row.order_image.split("/");
       this.img = img[img.length - 1];
       this.isEdit = true;
@@ -1350,14 +1291,17 @@ export default {
       }
     },
     openEdit() {
-      this.$bus.$emit("edit", [
-        this.row.company_name,
-        this.row.order_number,
-        this.img,
-        "",
-        "",
-        this.row.remarks,
-      ]);
+      if (this.isEdit) {
+        // console.log("openEdit");
+        this.$bus.$emit("edit", [
+          this.row.company_name,
+          this.row.order_number,
+          this.img,
+          "",
+          "",
+          this.row.remarks,
+        ]);
+      }
     },
     //打开订单信息的抽屉
     details(row) {

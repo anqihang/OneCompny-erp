@@ -8,9 +8,9 @@
         { title: '负责人信息', type: 'input' },
       ]"
       :button="[
-        { title: '搜索', type: '' },
-        { title: '重置', type: '' },
-        { title: '添加', type: 'primary' },
+        { title: '搜索', type: '',if:true },
+        { title: '重置', type: '' ,if:true},
+        { title: '添加', type: 'primary',if:true },
       ]"
     ></Search>
     <!-- //分页

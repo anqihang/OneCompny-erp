@@ -9,7 +9,7 @@
         <div v-for="(item, index) in search" :key="index" class="input">
           <div v-if="item.type == 'select'" class="select">
             <div class="leftName">{{ item.title }}</div>
-            <el-select v-model="searchInfo[index]" placeholder="请选择">
+            <el-select v-model="searchInfo[index]" placeholder="请选择" clearable>
               <el-option
                 v-for="item in selectInfo"
                 :key="item.value"
@@ -53,7 +53,7 @@
             >
               {{ fileName }}
             </span>
-            <!-- <span style="width:220px;border:0;overflow:hidden;position:absolute;left:120px;">{{infos[index]}}</span> -->
+            <span style="width:210px;border:0;overflow:hidden;position:absolute;left:130px;">{{infos[index]}}</span>
             <input
               :disabled="item.disabled"
               class="file"
@@ -141,6 +141,7 @@
           size="small"
           v-for="(item, index) in button"
           :key="index"
+          v-show="item.if"
         >
           {{ item.title }}
         </el-button>
@@ -161,7 +162,8 @@ export default {
       searchInfo: [],
       selectId: null,
       fileName: null,
-      infos:null,
+      infos: [],
+      isOrder:false,
     };
   },
   props: {
@@ -189,43 +191,53 @@ export default {
   mounted() {
     // this.searchInfo = this.info;
     this.$bus.$on("edit", this.copy);
+    // this.$bus.$on('open',this.openThis)
   },
   methods: {
     showName(index) {
+      console.log('a');
       let fi = document.querySelector(".file");
       this.fileName = fi.files[0].name;
       let file = fi.files[0];
-      // for (const iterator of this.searchInfo) {
-      //   if (iterator instanceof File) {
-      //     file = iterator;
-      //   }
-      // }
+    
       if (fi.files[0].type.split("/")[0] == "image") {
-
         if (file.size > 1024 * 1024) {
           this.compressImg(file, 0.2).then((res) => {
-            // console.log('@',res);
-            // this.$refs.img.src = window.URL.createObjectURL(res.file);
+           
             this.searchInfo[index] = res.file;
           });
-        }else{
+        } else {
           this.searchInfo[index] = fi.files[0];
         }
-      }else{
+      } else {
         this.searchInfo[index] = fi.files[0];
       }
     },
+    openThis(info){
+      // let fi = document.querySelector(".file");
+      // fi.value=''
+      // // fi.outerHTML = fi.outerHTML;
+      // console.dir('@a',fi);
+      this.infos = info;
+    },
     copy(info) {
-      this.infos=info;
-      this.searchInfo = info;
+      //关闭
+      this.fileName ='';
+      this.isOrder= false;
       let fi = document.querySelector(".file");
-      fi.value='';
-      console.log(fi.value);
+      fi.value=''
+      //编辑
+      this.searchInfo = info;
+      this.infos = info;
+      
+      console.log(3,this.infos);
+
     },
     sendInfo() {
       return { info: this.searchInfo, id: this.selectId };
     },
     querySearch(value, cb) {
+      this.isOrder =true;
       // cb([{value:''}])
       getCompanyList(value).then((res) => {
         cb(
@@ -334,7 +346,9 @@ export default {
     clickAtt(name) {
       switch (name) {
         case "添加":
-          this.$bus.$emit("add");
+          {
+            this.$bus.$emit("add");
+          }
           break;
         case "搜索":
           this.$bus.$emit("goSearch", this.searchInfo);
@@ -347,6 +361,11 @@ export default {
           break;
         case "确定":
           {
+    // let fi = document.querySelector(".file");
+
+    //         console.log(fi.files);
+console.log(this.infos);
+            if(this.isOrder){
             getCompanyList(this.searchInfo[0]).then((res) => {
               // this.searchInfo[0]=res.data.res[0].id
               if (!res.data.res[0]) {
@@ -362,6 +381,9 @@ export default {
                 });
               }
             });
+          }else{
+            this.$bus.$emit('storage',this.searchInfo);
+          }
           }
           break;
         case "选择产品":
@@ -463,7 +485,7 @@ export default {
     // align-items: flex-end;
     flex-wrap: wrap;
     min-width: 1080px;
-    margin-right: 200px;
+    margin-right: 180px;
 
     .search {
       flex-direction: column;
@@ -556,4 +578,17 @@ export default {
 .flexcol {
   flex-direction: row !important;
 }
+.table {
+    .el-table__header-wrapper {
+      .has-gutter {
+        tr {
+          th {
+            .cell {
+              padding: 12px 0;
+            }
+          }
+        }
+      }
+    }
+  }
 </style>

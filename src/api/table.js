@@ -258,6 +258,7 @@ export function addOrder(data) {
 }
 //订单列表
 export function getOrderList(params) {
+  console.log("@", params);
   return request({
     url: "/admin/order/order_list",
     method: "get",
@@ -268,6 +269,9 @@ export function getOrderList(params) {
       status: params.searchInfo[5],
       page_size: params.size,
       page: params.current,
+      customer_code: params.searchInfo[2],
+      product_code: params.searchInfo[3],
+      product_name: params.searchInfo[4],
     },
   });
 }
@@ -306,6 +310,7 @@ export function editOrder(data) {
     },
   });
 }
+//#region
 //删除库存
 // export function deleteOrder(params){
 //   return request({
@@ -316,3 +321,129 @@ export function editOrder(data) {
 //     }
 //   })
 // }
+//#endregion
+//-------------------------------------------------------------------
+//列表
+export function getEnterStorage(params, size, current) {
+  return request({
+    url: "/admin/stock/in_blound_list",
+    method: "get",
+    params: {
+      customer_name: params[0],
+      order_number: params[1],
+      customer_code: params[2],
+      product_code: params[3],
+      product_name:params[4],
+      number: params[5],
+      in_total: params[6],
+      stock_number: params[7],
+      not_in_number: params[8],
+      status: params[9],
+      page: current,
+      page_size: size,
+    },
+  });
+}
+//入库
+export function enterStorage(data) {
+  return request({
+    url: "/admin/stock/put_storage",
+    method: "post",
+    data: data,
+  });
+}
+//入库记录
+export function enterStorageHistory(params,code,person) {
+  return request({
+    url: "/admin/stock/put_storage_detail",
+    method: "get",
+    params: {
+      order_id: params,
+      out_number:code,
+      outdown_name:person
+    },
+  });
+}
+//编辑
+export function editEnter(data){
+  return request({
+    url:'/admin/stock/put_storage_edit',
+    method:'post',
+    data:{
+      inblound_data:data
+    }
+  })
+}
+//删除
+export function deleteEnter(params){
+  return request({
+    url:"/admin/stock/put_storage_delete",
+    method:'get',
+    params:{
+      inblound_ids:params
+    }
+  })
+}
+//出库--------------------------------------------------------------------------------------
+//列表
+export function getOutStorage(params,size,current){
+  return request({
+    url:'/admin/stock/out_blound_list',
+    method:'get',
+    params:{
+      page_size:size,
+      page:current,
+      customer_name: params[0],
+      order_number: params[1],
+      customer_code: params[2],
+      product_code: params[3],
+      product_name:params[4],
+      number: params[5],
+      in_total: params[6],
+      stock_number: params[7],
+      not_in_number: params[8],
+      status: params[9],
+    }
+  })
+}
+//出库
+export function outStorage(data){
+  return request({
+    url:'/admin/stock/out_storage',
+    method:'post',
+    data:data
+  })
+}
+//出库记录
+export function outStorageHistory(params,code,person){
+  return request({
+    url:'/admin/stock/out_storage_detail',
+    method:'get',
+    params:{
+      order_id:params,
+      out_number:code,
+      outdown_name:person
+    }
+  })
+}
+//编辑
+export function editOut(data){
+  return request({
+    url:'/admin/stock/out_storage_edit',
+    method:'post',
+    data:{
+      outblound_data:data
+    }
+  })
+}
+//删除
+export function deleteOut(params){
+  console.log(params);
+  return request({
+    url:"/admin/stock/out_storage_delete",
+    method:'get',
+    params:{
+      outblound_ids:params
+    }
+  })
+}

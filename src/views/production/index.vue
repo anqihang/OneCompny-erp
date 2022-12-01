@@ -11,9 +11,9 @@
         { title: '备注', type: 'input' },
       ]"
       :button="[
-        { title: '搜索', type: '' },
-        { title: '重置', type: '' },
-        { title: '添加', type: 'primary' },
+        { title: '搜索', type: '',if:true },
+        { title: '重置', type: '',if:true },
+        { title: '添加', type: 'primary',if:true },
       ]"
     ></Search>
     <!-- <el-pagination
@@ -50,7 +50,7 @@
             { title: '描述', type: 'input' },
             { title: '备注', type: 'input' },
           ]"
-          :button="[{ title: '确定', type: 'primary' }]"
+          :button="[{ title: '确定', type: 'primary',if:true }]"
         ></Search>
         <!-- <el-form
           :model="productionInfo"
