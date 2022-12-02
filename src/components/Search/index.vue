@@ -9,7 +9,11 @@
         <div v-for="(item, index) in search" :key="index" class="input">
           <div v-if="item.type == 'select'" class="select">
             <div class="leftName">{{ item.title }}</div>
-            <el-select v-model="searchInfo[index]" placeholder="请选择" clearable>
+            <el-select
+              v-model="searchInfo[index]"
+              placeholder="请选择"
+              clearable
+            >
               <el-option
                 v-for="item in selectInfo"
                 :key="item.value"
@@ -53,7 +57,17 @@
             >
               {{ fileName }}
             </span>
-            <span class="this"  style="width:210px;border:0;overflow:hidden;position:absolute;left:130px;">{{infos[index]}}</span>
+            <span
+              class="this"
+              style="
+                width: 210px;
+                border: 0;
+                overflow: hidden;
+                position: absolute;
+                left: 130px;
+              "
+              >{{ infos[index] }}</span
+            >
             <input
               :disabled="item.disabled"
               class="file"
@@ -152,7 +166,7 @@
 
 <script>
 import { getCompanyList } from "@/api/table";
-import cloneDeep  from "lodash/cloneDeep";
+import cloneDeep from "lodash/cloneDeep";
 
 export default {
   name: "Search",
@@ -164,7 +178,7 @@ export default {
       selectId: null,
       fileName: null,
       infos: [],
-      isOrder:false,
+      isOrder: false,
     };
   },
   props: {
@@ -190,24 +204,19 @@ export default {
     },
   },
   mounted() {
-    // this.searchInfo = this.info;
     this.$bus.$on("edit", this.copy);
-    // this.$bus.$on('open',this.openThis)
   },
-  beforeDestroy(){
-    // this.$bus.$off();
+  beforeDestroy() {
   },
   methods: {
     showName(index) {
-      // console.log('a');
       let fi = document.querySelector(".file");
       this.fileName = fi.files[0].name;
       let file = fi.files[0];
-    
+
       if (fi.files[0].type.split("/")[0] == "image") {
         if (file.size > 1024 * 1024) {
           this.compressImg(file, 0.2).then((res) => {
-           
             this.searchInfo[index] = res.file;
           });
         } else {
@@ -217,28 +226,25 @@ export default {
         this.searchInfo[index] = fi.files[0];
       }
     },
-    openThis(info){
-     
-    },
+    openThis(info) {},
     copy(info) {
       //关闭
-      this.fileName ='';
-      this.isOrder= false;
+      this.fileName = "";
+      this.isOrder = false;
       let fi = document.querySelector(".file");
-      fi.value='';
+      fi.value = "";
       // fi.outerHTML = fi.outerHTML;
       //编辑
       this.searchInfo = cloneDeep(info);
-      console.log('#',info);
+      console.log("#", info);
       this.infos = info;
-      console.log('#',info);
-      
+      console.log("#", info);
     },
     sendInfo() {
       return { info: this.searchInfo, id: this.selectId };
     },
     querySearch(value, cb) {
-      this.isOrder =true;
+      this.isOrder = true;
       // cb([{value:''}])
       getCompanyList(value).then((res) => {
         cb(
@@ -368,25 +374,25 @@ export default {
             console.log(JSON.stringify(this.infos));
             console.log(this.infos[2]);
 
-            if(this.isOrder){
-            getCompanyList(this.searchInfo[0]).then((res) => {
-              // this.searchInfo[0]=res.data.res[0].id
-              if (!res.data.res[0]) {
-                this.$message({
-                  message: "客户名不存在",
-                  type: "error",
-                });
-              } else {
-                this.$bus.$emit("determine", {
-                  info: this.searchInfo,
-                  id: this.selectId,
-                  info0: res.data.res[0].id,
-                });
-              }
-            });
-          }else{
-            this.$bus.$emit('storage',this.searchInfo);
-          }
+            if (this.isOrder) {
+              getCompanyList(this.searchInfo[0]).then((res) => {
+                // this.searchInfo[0]=res.data.res[0].id
+                if (!res.data.res[0]) {
+                  this.$message({
+                    message: "客户名不存在",
+                    type: "error",
+                  });
+                } else {
+                  this.$bus.$emit("determine", {
+                    info: this.searchInfo,
+                    id: this.selectId,
+                    info0: res.data.res[0].id,
+                  });
+                }
+              });
+            } else {
+              this.$bus.$emit("storage", this.searchInfo);
+            }
           }
           break;
         case "选择产品":
@@ -582,16 +588,16 @@ export default {
   flex-direction: row !important;
 }
 .table {
-    .el-table__header-wrapper {
-      .has-gutter {
-        tr {
-          th {
-            .cell {
-              padding: 12px 0;
-            }
+  .el-table__header-wrapper {
+    .has-gutter {
+      tr {
+        th {
+          .cell {
+            padding: 12px 0;
           }
         }
       }
     }
   }
+}
 </style>

@@ -17,7 +17,7 @@ export function getUserList(params) {
     },
   });
 }
-//----------------------------------------------------------------------------------
+//客户信息--------------------------------------------------------------------------------------
 //获取客户列表
 export function getClientList({ size, current, data, flag, order }) {
   return request({
@@ -128,7 +128,7 @@ export function deletePerson(id) {
     },
   });
 }
-//-------------------------------------------------------------------------
+//产品--------------------------------------------------------------------------------------
 //获取产品信息列表
 export function getProductionList(size, current, params) {
   return request({
@@ -233,8 +233,7 @@ export function deleteProduction(id) {
     },
   });
 }
-//
-//-----------------------------------------------------------------
+//订单--------------------------------------------------------------------------------------
 //获取产品列表信息
 export function getProductList(params) {
   return request({
@@ -322,7 +321,7 @@ export function editOrder(data) {
 //   })
 // }
 //#endregion
-//-------------------------------------------------------------------
+//入库--------------------------------------------------------------------------------------
 //列表
 export function getEnterStorage(params, size, current) {
   return request({
@@ -445,5 +444,14 @@ export function deleteOut(params){
     params:{
       outblound_ids:params
     }
+  })
+}
+//--------------------------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------
+export function getRoleList(params){
+  return request({
+    url:'/admin/system/role_list',
+    method:'get',
   })
 }
