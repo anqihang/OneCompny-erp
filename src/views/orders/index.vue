@@ -28,7 +28,7 @@
     ></Search>
     <!-- //添加 -->
     <el-drawer
-    ref="add"
+      ref="add"
       class="orderDrawer"
       :visible.sync="visibleAdd"
       direction="rtl"
@@ -897,17 +897,9 @@
           label="订单PDF"
           align="center"
           width="100"
-          class-name="li"
+          class-name="imagePDF"
         >
           <template slot-scope="scope">
-            <!-- <span
-              slot="reference"
-              style="
-                display: flex;
-                justify-content: start;
-                text-align: start !important;
-              "
-            > -->
             <el-image
               style="position: relative"
               :src="'http://192.168.1.121:8080' + scope.row.order_image"
@@ -915,8 +907,6 @@
                 'http://192.168.1.121:8080' + scope.row.order_image,
               ]"
             ></el-image>
-            <!-- {{scope.row.order_image}} -->
-            <!-- </span> -->
           </template>
         </el-table-column>
         <el-table-column
@@ -1075,8 +1065,8 @@ export default {
       perNum: [],
       //
       isEdit: false,
-      row: null,
-      img: null,
+      row: '',
+      img: '',
       editData: {},
       //
       deleteList: [],
@@ -1124,8 +1114,6 @@ export default {
     },
     //添加的确定按钮
     sendOrder(a) {
-      // console.log("@", this.perValue, this.perNum, a);
-      // console.log("@@@", this.addProductsList);
       if (!this.isEdit) {
         let products = [];
         for (const index in this.addProductsList) {
@@ -1135,7 +1123,6 @@ export default {
           arr.number = this.perNum[index] || "";
           products.push(arr);
         }
-        // console.log(a.info[2]);
         let data = new FormData();
         data.append("customer_id", a.id);
         data.append("order_number", a.info[1]);
@@ -1144,13 +1131,10 @@ export default {
         data.append("product_orders", JSON.stringify(products));
         data.append("order_image", a.info[2] || "");
         this.FlistLoading = true;
-        // if(!products){
         addOrder(data).then((res) => {
           this.closeAddDrawer();
           this.fetchData();
-          // this.FlistLoading = false;
         });
-      // }
       } else {
         this.editProduct();
         let arr = [];
@@ -1182,17 +1166,15 @@ export default {
     //添加编辑抽屉开关
     addOpenDrawer() {
       this.visibleAdd = true;
-      // this.$refs.add.openThis();
-      // if(this.isEdit){
-      // }
-
     },
     closeAddDrawer() {
       this.isEdit = false;
       this.perNum = [];
       this.perValue = [];
       this.maddProductsList = [];
-      (this.row = ""), (this.img = ""), (this.addProductsList = []);
+      this.row = ""; 
+      this.img = ""; 
+      this.addProductsList = [];
       this.$bus.$emit("edit", []);
       this.visibleAdd = false;
       this.fetchData();
@@ -1259,6 +1241,7 @@ export default {
       this.toPrice = row.total_price;
       let img = row.order_image.split("/");
       this.img = img[img.length - 1];
+      
       this.isEdit = true;
       this.addOpenDrawer();
       this.row = row;
@@ -1277,7 +1260,6 @@ export default {
       };
     },
     editProduct() {
-      console.log("@", this.maddProductsList);
 
       for (const iterator of this.maddProductsList) {
         for (const index in this.addProductsList) {
@@ -1292,6 +1274,7 @@ export default {
     },
     openEdit() {
       if (this.isEdit) {
+        console.log('@');
         // console.log("openEdit");
         this.$bus.$emit("edit", [
           this.row.company_name,
@@ -1507,6 +1490,17 @@ export default {
   }
   .el-drawer__body {
     padding: 0 20px;
+  }
+}
+.imagePDF{
+  position:relative;
+  padding: 0;
+  .cell{
+    position: absolute;
+    top:0;
+    right:0;
+    left:0;
+    padding: 0;
   }
 }
 </style>

@@ -193,7 +193,7 @@
         </div>
       </div>
       <div style="margin: 10px;position: absolute;left:0;right:0;bottom:0;top:218px">
-        <el-table class="infoD_t" v-loading="listLoading" element-loading-text="Loading" border stripe
+        <el-table class="infoD_t" height="100%" v-loading="listLoading" element-loading-text="Loading" border stripe
           highlight-current-row :data="infoList.order_infos" :row-style="{ height: '100px' }">
           <el-table-column align="center" label="序号" width="50" class-name="li">
             <template slot-scope="scope">
@@ -404,7 +404,34 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column align="center" label="操作"  width="200" class="operation" class-name="button editButton"
+          <el-table-column label="备注" align="center" width="100" class-name="mor">
+            <template slot-scope="scope">
+              <div style="
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+              ">
+                <div v-for="(item, index) in scope.row.inblound_infos" :key="index" style="
+                  height: 135px;
+                  position: relative;
+                  text-align: start;
+                  border-top: 1px solid #ebeef5;
+                  margin-top: -2px;
+                ">
+                  <span
+                   slot="reference" style="
+                  display: flex;
+                  justify-content: start;
+                  text-align: start !important;
+                ">
+                    {{ item.remarks }}
+                  </span>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="操作" fixed="right" width="200" class="operation" class-name="button editButton"
             style="border-left: 1px solid red">
             <template slot-scope="scope" style="display: flex;">
             <div v-for="(item, index) in scope.row.inblound_infos" :key="index" style="
@@ -736,6 +763,11 @@ export default {
       },
       perNum:[],
       infoId:null,
+      orderInfo:{
+        company_name:'',
+        status:'',
+        order_number:''
+      }
     };
   },
   mounted() {
@@ -819,15 +851,24 @@ export default {
           });
         ok = false;
         } else {
+          if(this.perNumber[index]<0){
+            this.$message({
+            message: '不可为负数',
+            type: 'error'
+          });
+          ok=false;
+
+          }else{
         obj.number = this.perNumber[index] ? this.perNumber[index] : 0;
+      }
         }
         infos.push(obj);
       }
-      data.append('godown_name', searchInfo[0]);
-      data.append('odd_number', searchInfo[1]);
-      data.append('remarks', searchInfo[3]);
-      data.append('inblound_image', searchInfo[2]);
-      data.append('inblound_infos', JSON.stringify(infos));
+      data.append('godown_name', searchInfo[0]||'');
+      data.append('odd_number', searchInfo[1]||'');
+      data.append('remarks', searchInfo[3]||'');
+      data.append('inblound_image', searchInfo[2]||'');
+      data.append('inblound_infos', JSON.stringify(infos)||'');
       if (ok) {
       enterStorage(data).then((res) => {
         this.closeAddDrawer();
@@ -839,8 +880,13 @@ export default {
     openInfo(row) {
       this.addObj = row;
       this.infoId = row.order_id;
+      this.orderInfo = {
+        company_name:row.company_name,
+        order_number:row.order_number,
+        status:row.status,
+      }
       enterStorageHistory(row.order_id).then((res) => {
-        this.infoList = res.data.res;
+        this.infoList = res.data.res||{order_infos:[]};
       })
       this.isInfo = true;
       this.visibleInfo = true;
@@ -888,6 +934,7 @@ export default {
     editSend(scope,item){
       this.showIndex =-1;
       this.showTime = -1;
+     
       // console.log(scope,item);
       let data = [{inblound_message_id:item.id,number:this.perInfo.number}];
       this.listLoading =true;
@@ -899,6 +946,7 @@ export default {
         this.listLoading =false;
       })
       })
+      this.listLoading = false;
     }
   },
 };
@@ -989,6 +1037,9 @@ export default {
   .el-drawer {
     min-width: 1400px;
     padding: 0 10px 0;
+    .el-drawer__body{
+      // position:relative;
+    }
   }
 }
 
@@ -1034,7 +1085,7 @@ export default {
 
 .infoD {
   .el-drawer{
-    overflow:auto;
+    // overflow:auto;
     .el-drawer__body{
       position:relative;
     }

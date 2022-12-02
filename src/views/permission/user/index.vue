@@ -3,7 +3,9 @@
     class="app-container"
     style="padding-top: 0; padding-right: 0; padding-left: 0"
   >
-    <Search></Search>
+    <Search :button="[
+      {title:'添加',type:'primary',if:true}
+    ]"></Search>
     <!--  -->
     <el-dialog :visible.sync="visibleDialog" title="添加用户">
           <el-form>
@@ -122,7 +124,7 @@ export default {
     };
   },
   created() {
-    this.fetchData();
+    // this.fetchData();
   },
   mounted() {
     this.$bus.$on("dialog", this.dialog);

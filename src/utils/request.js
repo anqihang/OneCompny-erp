@@ -7,8 +7,8 @@ import { getToken } from "@/utils/auth";
 const service = axios.create({
   //-----------------------------------------------------------------------------------------------
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  // baseURL: "http://192.168.1.121:8080", // url = base url + request url
-  baseURL:"http://tongyu.devapi.ltokay.cn",
+  baseURL: "http://192.168.1.121:8080", // url = base url + request url
+  // baseURL:"http://tongyu.devapi.ltokay.cn",
   // baseURL: 'http://127.0.0.1:4523/m1/1930977-0-default', // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000, // request timeout

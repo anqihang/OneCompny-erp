@@ -53,7 +53,7 @@
             >
               {{ fileName }}
             </span>
-            <span style="width:210px;border:0;overflow:hidden;position:absolute;left:130px;">{{infos[index]}}</span>
+            <span class="this"  style="width:210px;border:0;overflow:hidden;position:absolute;left:130px;">{{infos[index]}}</span>
             <input
               :disabled="item.disabled"
               class="file"
@@ -152,6 +152,7 @@
 
 <script>
 import { getCompanyList } from "@/api/table";
+import cloneDeep  from "lodash/cloneDeep";
 
 export default {
   name: "Search",
@@ -193,9 +194,12 @@ export default {
     this.$bus.$on("edit", this.copy);
     // this.$bus.$on('open',this.openThis)
   },
+  beforeDestroy(){
+    // this.$bus.$off();
+  },
   methods: {
     showName(index) {
-      console.log('a');
+      // console.log('a');
       let fi = document.querySelector(".file");
       this.fileName = fi.files[0].name;
       let file = fi.files[0];
@@ -214,24 +218,21 @@ export default {
       }
     },
     openThis(info){
-      // let fi = document.querySelector(".file");
-      // fi.value=''
-      // // fi.outerHTML = fi.outerHTML;
-      // console.dir('@a',fi);
-      this.infos = info;
+     
     },
     copy(info) {
       //关闭
       this.fileName ='';
       this.isOrder= false;
       let fi = document.querySelector(".file");
-      fi.value=''
+      fi.value='';
+      // fi.outerHTML = fi.outerHTML;
       //编辑
-      this.searchInfo = info;
+      this.searchInfo = cloneDeep(info);
+      console.log('#',info);
       this.infos = info;
+      console.log('#',info);
       
-      console.log(3,this.infos);
-
     },
     sendInfo() {
       return { info: this.searchInfo, id: this.selectId };
@@ -361,10 +362,12 @@ export default {
           break;
         case "确定":
           {
-    // let fi = document.querySelector(".file");
+            let fi = document.querySelector(".file");
 
-    //         console.log(fi.files);
-console.log(this.infos);
+            console.log(fi.files);
+            console.log(JSON.stringify(this.infos));
+            console.log(this.infos[2]);
+
             if(this.isOrder){
             getCompanyList(this.searchInfo[0]).then((res) => {
               // this.searchInfo[0]=res.data.res[0].id
