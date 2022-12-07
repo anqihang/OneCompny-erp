@@ -66,7 +66,7 @@
           <div>产品</div>
           <div>订单总价：{{ totalPrice }}</div>
         </div>
-        <div class="inpu">
+        <div class="inpu" style="margin:5px;">
           <el-table
             :data="addProductsList"
             border
@@ -143,14 +143,14 @@
                 </span>
               </template>
             </el-table-column>
-            <el-table-column
+            <!-- <el-table-column
               label="当前库存"
               align="center"
               width="90"
               class-name="li"
             >
-              <template slot-scope="scope"> 100000 </template>
-            </el-table-column>
+              <template slot-scope="scope"> #100000 </template>
+            </el-table-column> -->
             <el-table-column
               label="产品规格"
               align="center"
@@ -162,7 +162,7 @@
                   placement="top-start"
                   min-width="200%"
                   trigger="hover"
-                  :content="scope.row.procudt_specs"
+                  :content="scope.row.product_specs"
                 >
                   <span
                     class="threeLine"
@@ -351,14 +351,14 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column
+        <!-- <el-table-column
           label="当前库存"
           align="center"
           width="90"
           class-name="li"
         >
           <template slot-scope="scope"> 100000 </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column
           label="产品规格"
           align="center"
@@ -480,12 +480,6 @@
             class-name="li"
           >
             <template slot-scope="scope">
-              <el-popover
-                placement="top-start"
-                min-width="200%"
-                trigger="hover"
-                content="scope.row.address"
-              >
                 <span
                   class="threeLine"
                   slot="reference"
@@ -497,7 +491,6 @@
                 >
                   {{ scope.row.product_code }}
                 </span>
-              </el-popover>
             </template>
           </el-table-column>
           <el-table-column
@@ -511,7 +504,7 @@
                 placement="top-start"
                 min-width="200%"
                 trigger="hover"
-                content="scope.row.address"
+                :content="scope.row.product_name"
               >
                 <span
                   class="threeLine"
@@ -533,7 +526,9 @@
             width="140"
             class-name="li"
           >
-            <template slot-scope="scope">asvsv</template>
+            <template slot-scope="scope">
+              {{scope.row.out_total}}
+            </template>
           </el-table-column>
           <el-table-column
             label="未出库数"
@@ -542,12 +537,6 @@
             class-name="li"
           >
             <template slot-scope="scope">
-              <el-popover
-                placement="top-start"
-                min-width="200%"
-                trigger="hover"
-                content="scope.row.address"
-              >
                 <span
                   class="threeLine"
                   slot="reference"
@@ -557,9 +546,8 @@
                     text-align: start !important;
                   "
                 >
-                  savas
+                {{scope.row.not_out_number}}
                 </span>
-              </el-popover>
             </template>
           </el-table-column>
           <el-table-column
@@ -569,12 +557,6 @@
             class-name="li"
           >
             <template slot-scope="scope">
-              <el-popover
-                placement="top-start"
-                min-width="200%"
-                trigger="hover"
-                content="scope.row.address"
-              >
                 <span
                   class="threeLine"
                   slot="reference"
@@ -586,7 +568,6 @@
                 >
                   {{ scope.row.price }}
                 </span>
-              </el-popover>
             </template>
           </el-table-column>
           <el-table-column
@@ -596,12 +577,6 @@
             class-name="li"
           >
             <template slot-scope="scope">
-              <el-popover
-                placement="top-start"
-                min-width="200%"
-                trigger="hover"
-                content="scope.row.address"
-              >
                 <span
                   class="threeLine"
                   slot="reference"
@@ -613,7 +588,6 @@
                 >
                   {{ scope.row.price * scope.row.number }}
                 </span>
-              </el-popover>
             </template>
           </el-table-column>
         </el-table>
@@ -887,7 +861,7 @@
                 text-align: start !important;
               "
             >
-              <el-tag :type="scope.row.status | statusFilter">{{
+              <el-tag effect="dark" :type="(scope.row.status==0?'danger':'success')">{{
                 scope.row.status == 0 ? "进行中" : "已完成"
               }}</el-tag>
             </span>
@@ -902,9 +876,9 @@
           <template slot-scope="scope">
             <el-image
               style="position: relative"
-              :src="'http://192.168.1.121:8080' + scope.row.order_image"
+              :src="'http://tongyu.devapi.ltokay.cn' + scope.row.order_image"
               :preview-src-list="[
-                'http://192.168.1.121:8080' + scope.row.order_image,
+                'http://tongyu.devapi.ltokay.cn' + scope.row.order_image,
               ]"
             ></el-image>
           </template>
@@ -920,7 +894,7 @@
               placement="top-start"
               min-width="200%"
               trigger="hover"
-              content="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaassssssssssssssssssssssssaaaaaaaaaaaaaaa"
+              :content="scope.row.remarks"
             >
               <span
                 class="threeLine"
@@ -1016,8 +990,8 @@ export default {
   filters: {
     statusFilter(status) {
       const statusMap = {
-        0: "success",
-        1: "gray",
+        1: "success",
+        0: "danger",
       };
       return statusMap[status];
     },
@@ -1274,7 +1248,6 @@ export default {
     },
     openEdit() {
       if (this.isEdit) {
-        console.log('@');
         // console.log("openEdit");
         this.$bus.$emit("edit", [
           this.row.company_name,
@@ -1449,7 +1422,7 @@ export default {
       overflow: auto !important;
       .el-drawer__body {
         // margin: 10px;
-        padding: 0 20px;
+        padding: 0 15px;
       }
     }
   }

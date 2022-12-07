@@ -25,7 +25,15 @@
   },
 ]"></Search>
     <!-- 添加弹窗 -->
-    <el-drawer title="添加入库信息" size="70%" :visible.sync="visibleAdd" class="addDrawer" @close="closeAddDrawer">
+    <el-drawer title="添加出库信息" size="70%" :visible.sync="visibleAdd" class="addDrawer" @close="closeAddDrawer">
+      <Search :search="[
+        { title: '出库人', type: 'input' },
+        { title: '出库单号', type: 'input' },
+        { title: '选择出库单图片', type: 'file' },
+        { title: '备注', type: 'input' },
+      ]" :button="[
+  { title: '确定', type: 'primary', if: true }
+]"></Search>
       <div style="display: flex; flex-wrap: wrap" class="info">
         <div style="width: 33%">
           <div>客户名称</div>
@@ -41,14 +49,7 @@
         </div>
       </div>
       
-      <Search :search="[
-        { title: '出库人', type: 'input' },
-        { title: '出库单号', type: 'input' },
-        { title: '选择出库单图片', type: 'file' },
-        { title: '备注', type: 'input' },
-      ]" :button="[
-  { title: '确定', type: 'primary', if: true }
-]"></Search>
+      
       <div style="background-color: #f5f7fa; height: 3px; margin: 10px 0"></div>
 
       <div>
@@ -102,7 +103,7 @@
             
             <el-table-column label="产品规格" align="center" min-width="100" class-name="li">
               <template slot-scope="scope">
-                <el-popover placement="top-start" min-width="200%" trigger="hover" content="aaaaaaaaaaaaaa">
+                <el-popover placement="top-start" min-width="200%" trigger="hover" :content="scope.row.product_specs">
                   <span class="threeLine" slot="reference" style="
                       display: flex;
                       justify-content: start;
@@ -190,7 +191,6 @@
                 display: flex;
                 flex-direction: column;
               ">
-                <el-popover placement="top-start" min-width="200%" trigger="hover" content="scope.row.address">
                   <span class="threeLine" slot="reference" style="
                   display: flex;
                   justify-content: start;
@@ -198,7 +198,6 @@
                 ">
                     {{ scope.row.customer_code }}
                   </span>
-                </el-popover>
               </div>
               <!-- </div> -->
             </template>
@@ -211,14 +210,6 @@
                 display: flex;
                 flex-direction: column;
               ">
-                <!-- <div v-for="(item, index) in scope.row.info" :key="index" style="
-                  height: 70px;
-                  position: relative;
-                  text-align: start;
-                  border-top: 1px solid #ebeef5;
-                  margin-top: -2px;
-                "> -->
-                <el-popover placement="top-start" min-width="200%" trigger="hover" content="scope.row.address">
                   <span class="threeLine" slot="reference" style="
                     display: flex;
                     justify-content: start;
@@ -226,8 +217,6 @@
                   ">
                     {{ scope.row.product_code }}
                   </span>
-                </el-popover>
-                <!-- </div> -->
               </div>
             </template>
           </el-table-column>
@@ -239,14 +228,8 @@
                 display: flex;
                 flex-direction: column;
               ">
-                <!-- <div v-for="(item, index) in scope.row.info" :key="index" style="
-                  height: 70px;
-                  position: relative;
-                  text-align: start;
-                  border-top: 1px solid #ebeef5;
-                  margin-top: -2px;
-                "> -->
-                <el-popover placement="top-start" min-width="200%" trigger="hover" content="scope.row.address">
+                
+                <el-popover placement="top-start" min-width="200%" trigger="hover" :content="scope.row.product_name">
                   <span class="threeLine" slot="reference" style="
                     display: flex;
                     justify-content: start;
@@ -255,7 +238,6 @@
                     {{ scope.row.product_name }}
                   </span>
                 </el-popover>
-                <!-- </div> -->
               </div>
             </template>
           </el-table-column>
@@ -402,14 +384,18 @@
                   border-top: 1px solid #ebeef5;
                   margin-top: -2px;
                 ">
-                <el-image style="position: relative" :src="'http://192.168.1.121:8080' + item.outdown_image"
+                <!-- <el-image style="position: relative" :src="'http://192.168.1.122:8080' + item.outdown_image"
                   :preview-src-list="[
-                    'http://192.168.1.121:8080' + item.outdown_image,
+                    'http://192.168.1.122:8080' + item.outdown_image,
+                  ]"></el-image> -->
+                  <el-image style="position: relative" :src="'http://tongyu.devapi.ltokay.cn' + item.outdown_image"
+                  :preview-src-list="[
+                    'http://tongyu.devapi.ltokay.cn' + item.outdown_image,
                   ]"></el-image>
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="备注" align="center" width="100" class-name="mor">
+          <el-table-column label="备注" align="center" width="100" class-name="li">
             <template slot-scope="scope">
               <div style="
                 width: 100%;
@@ -417,22 +403,14 @@
                 display: flex;
                 flex-direction: column;
               ">
-                <div v-for="(item, index) in scope.row.outblound_infos" :key="index" style="
-                  height: 135px;
-                  position: relative;
-                  text-align: start;
-                  border-top: 1px solid #ebeef5;
-                  margin-top: -2px;
-                ">
                   <span
                    slot="reference" style="
                   display: flex;
                   justify-content: start;
                   text-align: start !important;
                 ">
-                    {{ item.remarks }}
+                    {{ scope.row.remarks }}
                   </span>
-                </div>
               </div>
             </template>
           </el-table-column>
@@ -637,7 +615,7 @@
         
         <el-table-column label="状态" width="80" class-name="li indext" align="center">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.status | statusFilter">{{
+            <el-tag effect="dark" :type="(scope.row.status==0?'danger':'success')">{{
                 scope.row.status == 0 ? "进行中" : "已完成"
             }}</el-tag>
           </template>
@@ -683,12 +661,25 @@ export default {
   components: {
     Search,
   },
+  computed:{
+    // status(){
+    //   for (const iterator of this.list) {
+    //     iterator.status = 1;
+    //     for (const iterator1 of iterator.order_infos) {
+    //       if(iterator1.not_out_number > 0){
+    //         console.log(iterator1.not_out_number);
+    //         iterator.status = 0;
+    //       }
+    //     }
+    //   }
+    // }
+  },
   filters: {
     statusFilter(status) {
       const statusMap = {
-        published: "success",
-        draft: "gray",
-        deleted: "danger",
+        1: "success",
+        0: "danger",
+        
       };
       return statusMap[status];
     },
@@ -874,6 +865,16 @@ export default {
         this.list = res.data.res.data.filter(item=>item.order_infos.length>0);
         this.listLoading =false;
         this.FlistLoading = false;
+        //
+        for (const iterator of this.list) {
+        iterator.status = 1;
+        for (const iterator1 of iterator.order_infos) {
+          if(iterator1.not_out_number > 0){
+            console.log(iterator1.not_out_number);
+            iterator.status = 0;
+          }
+        }
+      }
       })
     },
     edit(scope,index,item){
@@ -955,7 +956,7 @@ export default {
 .addDrawer {
   .el-drawer {
     min-width: 1400px;
-overflow: auto;
+        overflow: auto;
     .el-drawer__body {
       padding: 0 20px;
     }

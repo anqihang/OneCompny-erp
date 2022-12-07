@@ -30,6 +30,7 @@
     </el-pagination> -->
     <!-- 添加 -->
     <el-drawer
+    v-loading="addListLoading"
       class="addProductionDrawer"
       direction="rtl"
       size="60%"
@@ -79,7 +80,7 @@
           margin: 0 30px;
           background-color: rgba(128, 128, 128, 0.1);
           border-radius: 5px;
-          margin: 10px;
+          margin: 5px;
           padding: 10px 20px;
         "
       >
@@ -139,10 +140,10 @@
           </el-button>
         </div>
       </div>
-      <div style="font-size: 30px; margin-left: 10px" v-if="bomList.length">
+      <div style="font-size: 30px; margin-left: 5px" v-if="bomList.length">
         产品BOM信息
       </div>
-      <div v-if="bomList.length" style="margin: 10px">
+      <div v-if="bomList.length" style="margin: 5px">
         <el-table
           v-loading="listLoading"
           element-loading-text="Loading"
@@ -407,7 +408,7 @@
           margin: 0 30px;
           background-color: rgba(128, 128, 128, 0.2);
           border-radius: 5px;
-          margin: 10px;
+          margin: 5px;
           padding: 10px 20px;
         "
       >
@@ -425,7 +426,7 @@
           </el-button>
         </div>
       </div>
-      <div style="margin: 10px">
+      <div style="margin: 5px">
         <el-table
           v-loading="listLoading"
           element-loading-text="Loading"
@@ -1007,6 +1008,7 @@ export default {
       },
       listLoading: false,
       FlistLoading: false,
+      addListLoading:false,
       //
       page_size: 10,
       page_current: 1,
@@ -1238,11 +1240,13 @@ export default {
     },
     //产品详情的drawer的开关
     showInfo(row) {
+      this.FlistLoading = true;
       this.editId = row.product_id;
       getBOMList(row.product_id).then((res) => {
         this.infoList = res.data.res;
-        console.log(this.infoList);
         this.visibleDialog_info = true;
+      }).finally(()=>{
+        this.FlistLoading = false;
       });
     },
     closeInfo() {
@@ -1250,7 +1254,7 @@ export default {
     },
     editProduction(row) {
       this.editSend = 1;
-      this.FlistLoading = true;
+      this.addListLoading = true;
       getCompanyList(row.customer_name).then((res) => {
         this.searchI = res.data.res[0].id;
       });
@@ -1271,7 +1275,9 @@ export default {
         this.bomList = res.data.res.product_bom;
         this.length = this.bomList.length;
         this.$bus.$emit("edit", this.propInfo);
-        this.FlistLoading = false;
+        // this.FlistLoading = false;
+      }).finally(()=>{
+        this.addListLoading =false;
       });
       this.addOpenDrawer();
     },
@@ -1357,7 +1363,7 @@ export default {
 .production {
   // position: none!important;
   .info {
-    margin: 10px;
+    margin: 5px!important;
     justify-content: flex-start;
     background-color: rgba(230, 230, 230, 0.4);
     border-radius: 10px;
@@ -1378,7 +1384,7 @@ export default {
   }
   .addProductionDrawer {
     .el-drawer__body {
-      padding: 20px;
+      padding: 15px;
     }
     .el-drawer {
       min-width: 1500px !important;

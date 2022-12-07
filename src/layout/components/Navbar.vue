@@ -18,18 +18,31 @@
               Home
             </el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
+            <el-dropdown-item @click.native="changePwd">修改密码</el-dropdown-item>
           <el-dropdown-item divided @click.native="logout">
             <span style="display:block;">Log Out</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
+
+
+    <el-drawer
+      title="修改密码"
+      :visible.sync="visibleAdd"
+      @close="closeAdd"
+      class="addnavDrawer"
+    >
+      <el-form :model="userInfo" label-width="100px">
+        <el-form-item label="密码">
+          <el-input v-model="userInfo.password"></el-input>
+        </el-form-item>
+      </el-form>
+      <div style="float: right; margin-right: 30px">
+        <el-button @click="closeAdd">取消</el-button>
+        <el-button type="primary">确定</el-button>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
@@ -37,6 +50,7 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
+import {changePwd} from '@/api/table'
 
 export default {
   components: {
@@ -44,13 +58,37 @@ export default {
     Hamburger
   },
   computed: {
+    name(){
+      return localStorage.getItem('name');
+    },
     ...mapGetters([
       'sidebar',
       'avatar',
-      'name'
+      // 'name'
     ])
   },
+  //+++++++++++++++++
+  data(){return{
+    visibleAdd:false,
+    userInfo:{
+      password:''
+    }
+  }},
+  //
   methods: {
+    //+++++++++++++++++++++++++
+    changePwd(){
+      this.visibleAdd =true;
+    },
+    closeAdd(){
+      this.visibleAdd =false;
+    },
+    sendPwd(){
+      changePwd({id:localStorage.getItem('id'),password:this.userInfo.password}).then((res)=>{
+        this.closeAdd();
+      })
+    },
+    //
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
@@ -61,7 +99,20 @@ export default {
   }
 }
 </script>
-
+<style lang="scss">
+.addnavDrawer {
+    .el-drawer {
+      min-width: 478px !important;
+      overflow: scroll !important;
+      .el-drawer__body {
+        margin: 20px;
+      }
+    }
+    .el-input {
+      width: 300px !important;
+    }
+  }
+</style>
 <style lang="scss" scoped>
 .navbar {
   min-width:840px;

@@ -150,4 +150,7 @@ export default {
 .el-drawer__body{
   padding-top: 0!important;
 }
+#el-drawer__title{
+  margin-bottom: 0;
+}
 </style>

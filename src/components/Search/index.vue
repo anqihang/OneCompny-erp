@@ -68,6 +68,7 @@
               "
               >{{ infos[index] }}</span
             >
+            <form class="form">
             <input
               :disabled="item.disabled"
               class="file"
@@ -81,6 +82,7 @@
                 z-index: 2;
               "
             />
+          </form>
           </div>
           <!-- // -->
           <div v-if="item.type == 'input'">
@@ -179,6 +181,7 @@ export default {
       fileName: null,
       infos: [],
       isOrder: false,
+      removeFile:true,
     };
   },
   props: {
@@ -207,10 +210,13 @@ export default {
     this.$bus.$on("edit", this.copy);
   },
   beforeDestroy() {
+    this.$bus.$off();
   },
   methods: {
     showName(index) {
       let fi = document.querySelector(".file");
+      // console.log(fi.select);
+      // console.log('@',fi.files);
       this.fileName = fi.files[0].name;
       let file = fi.files[0];
 
@@ -226,19 +232,32 @@ export default {
         this.searchInfo[index] = fi.files[0];
       }
     },
-    openThis(info) {},
+    remove(info) {
+      let form = document.querySelector('.form');
+      let fi = document.querySelector(".file");
+      if(fi){
+        // fi.value = "";
+        form.reset();
+      }
+      this.fileName = "";
+
+      this.searchInfo = cloneDeep(info);
+      this.infos = cloneDeep(info);
+      console.log('remove',fi.files);
+    },
     copy(info) {
       //关闭
       this.fileName = "";
       this.isOrder = false;
       let fi = document.querySelector(".file");
-      fi.value = "";
+      if(fi){
+        fi.value = "";
+      }
       // fi.outerHTML = fi.outerHTML;
       //编辑
+
       this.searchInfo = cloneDeep(info);
-      console.log("#", info);
-      this.infos = info;
-      console.log("#", info);
+      this.infos = cloneDeep(info);
     },
     sendInfo() {
       return { info: this.searchInfo, id: this.selectId };
@@ -368,11 +387,6 @@ export default {
           break;
         case "确定":
           {
-            let fi = document.querySelector(".file");
-
-            console.log(fi.files);
-            console.log(JSON.stringify(this.infos));
-            console.log(this.infos[2]);
 
             if (this.isOrder) {
               getCompanyList(this.searchInfo[0]).then((res) => {
@@ -391,6 +405,8 @@ export default {
                 }
               });
             } else {
+              console.log("0-0000");
+              console.log(this.$bus);
               this.$bus.$emit("storage", this.searchInfo);
             }
           }
@@ -457,10 +473,15 @@ export default {
         right: 0;
         &-inner {
           // height: 100%;
-          top: -4px;
+          top: 0;
           border: 0;
           right: 0;
           left: unset;
+          i{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
         }
       }
     }

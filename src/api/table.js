@@ -7,16 +7,7 @@ export function getList(params) {
     params,
   });
 }
-//获取管理员列表
-export function getUserList(params) {
-  return request({
-    url: "/admin/system/admin_list",
-    method: "get",
-    params: {
-      page_size: params,
-    },
-  });
-}
+
 //客户信息--------------------------------------------------------------------------------------
 //获取客户列表
 export function getClientList({ size, current, data, flag, order }) {
@@ -338,8 +329,10 @@ export function getEnterStorage(params, size, current) {
       stock_number: params[7],
       not_in_number: params[8],
       status: params[9],
-      page: current,
-      page_size: size,
+      // page: current,
+      // page_size: size,
+      per_page:size,
+      page_current:current,
     },
   });
 }
@@ -390,17 +383,19 @@ export function getOutStorage(params,size,current){
     url:'/admin/stock/out_blound_list',
     method:'get',
     params:{
-      page_size:size,
-      page:current,
+      // page_size:size,
+      // page:current,
+      page_current:current,
+      per_page:size,
       customer_name: params[0],
       order_number: params[1],
       customer_code: params[2],
       product_code: params[3],
       product_name:params[4],
       number: params[5],
-      in_total: params[6],
+      out_total: params[6],
       stock_number: params[7],
-      not_in_number: params[8],
+      not_out_number: params[8],
       status: params[9],
     }
   })
@@ -447,11 +442,208 @@ export function deleteOut(params){
   })
 }
 //--------------------------------------------------------------------------------------
-
+//发票收款
+export function getCollectionList({params,size,current}){
+  // console.log(params);
+  return request({
+    url:'/admin/payment/payment_list',
+    method:'get',
+    params:{
+      current_page:current,
+      per_page:size,
+      customer_name: params[0]||'',
+      order_number: params[1]||'',
+      customer_code: params[2]||'',
+      product_code: params[3]||'',
+      product_name: params[4]||'',
+      number: params[5]||'',
+      out_total: params[6]||'',
+      not_out_number: params[7]||'',
+      status: params[8]||'',
+    }
+  })
+}
+//开票信息
+export function invoiceDe(params){
+  return request({
+    url:"/admin/payment/receipt_list",
+    method:'get',
+    params:{
+      order_id:params
+    }
+  })
+}
+//开票
+export function Invoicing(data){
+  return request({
+    url:'/admin/payment/invoicing',
+    method:'post',
+    data:data
+  })
+}
+//发票记录
+export function invoiceHistory(id,status){
+  return request({
+    url:'/admin/payment/invoice_detail',
+    method:'get',
+    params:{
+      order_id:id,
+      status:status
+    }
+  })
+}
+//收款
+export function Receipt(data){
+  return request({
+    url:'/admin/payment/payment',
+    method:'post',
+    data:data
+  })
+}
+//收款历史
+export function collectList(data){
+  return request({
+    url:'/admin/payment/history_list',
+    method:'post',
+    data:{
+      receipt_id:data
+    }
+  })
+}
 //--------------------------------------------------------------------------------------
-export function getRoleList(params){
+//角色
+export function getRoleList(){
   return request({
     url:'/admin/system/role_list',
     method:'get',
+  })
+}
+//添加角色
+export function addRole(id,data){
+  return request({
+    url:'/admin/system/role_add',
+    method:'post',
+    data:{
+      name:data.name,
+      desc:data.desc,
+      auth_ids:JSON.stringify(data.checked),
+    }
+  })
+}
+//编辑
+export function editRole(data){
+  return request({
+    url:"/admin/system/role_edit",
+    method:'post',
+    data:{
+      id:id,
+      name:data.name,
+      desc:data.desc,
+      auth_ids:data.checked
+    }
+  })
+}
+//删除
+export function deleteRole(params){
+  return request({
+    url:'/admin/system/role_delete',
+    method:'get',
+    params:{
+      id:params
+    }
+  })
+}
+//-----------------------------------------------------------
+//获取管理员列表
+export function getUserList() {
+  return request({
+    url: "/admin/system/admin_list",
+    method: "get",
+  });
+}
+//添加
+export function addUser(data){
+  return request({
+    url:'/admin/system/admin_add',
+    method:'post',
+    data:{
+      account:data.account,
+      role_id:data.role,
+      pwd:data.password,
+      name:data.name,
+      email:data.email,
+    }
+  })
+}
+//编辑
+export function editUser(id,data){
+  return request({
+    url:'/admin/system/admin_edit',
+    method:'post',
+    data:{
+      account:data.account,
+      name:data.name,
+      role_id:data.role,
+      email:data.email,
+      id:id
+    }
+  })
+}
+//删除
+export function deleteUser(params){
+  return request({
+    url:'/admin/system/admin_delete',
+    method:'get',
+    params:{
+      id:params
+    }
+  }) 
+}
+//改密码
+export function changePwd(data){
+  return request({
+    url:"/admin/system/admin_password_edit",
+    method:'psot',
+    data:{
+      id:data.id,
+      pwd:data.password
+    }
+  })
+}
+//==========================
+//权限
+export function addPer(data){
+  return request({
+    url:"/admin/system/auth_add",
+    method:"post",
+    data:{
+      auth_name:data.name,
+      pid:data.id,
+      uri:data.func,
+      route:data.path,
+      listorder:data.weight
+    }
+  })
+}
+//权限列表
+export function getPerList(){
+  return request({
+    url:"/admin/system/auth_list",
+    method:"get",
+  })
+}
+//编辑权限
+export function perEdit(id,data){
+  return request({
+    url:"/admin/system/auth_edit",
+    method:"post",
+    data:{
+      id:id,
+      auth_name:data.name,
+      pid:data.id,
+      route:data.path,
+      uri:data.func,
+      listorder:data.weight
+    }
   })
 }

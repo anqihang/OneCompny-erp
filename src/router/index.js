@@ -57,10 +57,10 @@ export const constantRoutes = [
     ],
   },
   {
-    path: "/information1",
+    path: "/product",
     component: Layout,
-    redirect: "/information1/production",
-    name: "Information1",
+    redirect: "/product/production",
+    name: "Product",
     meta: { title: "", icon: "el-icon-s-help" },
     children:[
       {
@@ -72,10 +72,10 @@ export const constantRoutes = [
     ]
   },
   {
-    path: "/example",
+    path: "/order",
     component: Layout,
-    redirect: "/example/orders",
-    name: "Example",
+    redirect: "/order/orders",
+    name: "Order",
     meta: { title: "", icon: "el-icon-s-help" },
     children: [
       //#region
@@ -129,9 +129,9 @@ export const constantRoutes = [
     },
     children: [
       {
-        path: "depotHistory",
+        path: "inDepot",
         component: () => import("@/views/depot/depotHistory/index"), // Parent router-view
-        name: "DepotHistory",
+        name: "InDepot",
         meta: { title: "入库管理" },
         //#region
         // children: [
@@ -191,10 +191,10 @@ export const constantRoutes = [
   // },
   //#endregion
   {
-    path: "/example2",
+    path: "/pay",
     component: Layout,
-    redirect: "/example2/payments",
-    name: "Example2",
+    redirect: "/pay/payments",
+    name: "Pay",
     meta: { title: "", icon: "el-icon-s-help" },
     children: [
       {
@@ -252,7 +252,13 @@ export const constantRoutes = [
         component: () => import("@/views/permission/user/index"), // Parent router-view
         name: "User",
         meta: { title: "用户管理" },
-      },      
+      }, 
+      {
+        path: "per",
+        component: () => import("@/views/permission/permi/index"), // Parent router-view
+        name: "Per",
+        meta: { title: "权限控制" },
+      }     
     ],
   },
   //

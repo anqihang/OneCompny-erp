@@ -6,7 +6,8 @@ const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: ''
+    avatar: '',
+    id:''
   }
 }
 
@@ -22,6 +23,11 @@ const mutations = {
   SET_NAME: (state, name) => {
     state.name = name
   },
+  //
+  SET_ID: (state, id) => {
+    state.id = id
+  },
+  //
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   }
@@ -41,6 +47,8 @@ const actions = {
         //--------------------------------
         commit('SET_NAME',data.name)
         localStorage.setItem('name',data.name);
+        commit('SET_ID',data.id)
+        localStorage.setItem('id',data.id)
         //--------------------------------
         // setToken(data.X-token);
         resolve()
@@ -75,8 +83,12 @@ const actions = {
   // user logout
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
+      localStorage.removeItem('ax-token');
+      localStorage.removeItem('name');
+      localStorage.removeItem('id');
       logout(state.token).then(() => {
         removeToken() // must remove  token  first
+        localStorage.removeItem('id');
         resetRouter()
         commit('RESET_STATE')
         resolve()

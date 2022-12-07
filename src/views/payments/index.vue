@@ -41,13 +41,17 @@
     ></Search>
     <!-- 开票 -->
     <el-drawer
-      title="结款"
+      title="开票"
       :visible.sync="visibleInfo"
       @close="closeInfo"
+      :before-close="removeImg"
       size="60%"
       class="payInfo"
     >
       <Search
+        v-if="show"
+
+      ref="search1"
         :search="[
           { title: '发票号', type: 'input' },
           { title: '发票图片', type: 'file' },
@@ -57,25 +61,25 @@
       <div style="display: flex; flex-wrap: wrap" class="info">
         <div style="width: 33%">
           <div>客户名称</div>
-          <div>aaaaa</div>
+          <div>{{ customerInfo.company_name }}</div>
         </div>
         <div style="width: 33%">
           <div>订单号</div>
-          <div>bbbbb</div>
+          <div>{{ customerInfo.order_number }}</div>
         </div>
         <div style="width: 33%">
-          <div>订单状态</div>
-          <div>ccccc</div>
+          <div>结款状态</div>
+          <div>{{ customerInfo.bill_status == 0 ? "进行中" : "已完成" }}</div>
         </div>
       </div>
       <!-- // -->
       <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0"></div>
       <div style="float: right; margin: 10px 10px 20px">
         <div>
-          应收总额：<span style="font-weight: 700">{{ 1000 }}</span>
+          应收总额：<span style="font-weight: 700">{{ rece_total }}</span>
         </div>
         <div>
-          发票总额：<span style="font-weight: 700">{{ 2000 }}</span>
+          发票总额：<span style="font-weight: 700">{{ invoice_total }}</span>
         </div>
       </div>
       <!--  -->
@@ -87,7 +91,7 @@
           border
           stripe
           highlight-current-row
-          :data="list"
+          :data="invoicList"
           :row-style="{ height: '100px' }"
         >
           <el-table-column
@@ -115,24 +119,17 @@
                   flex-direction: column;
                 "
               >
-                <el-popover
-                  placement="top-start"
-                  min-width="200%"
-                  trigger="hover"
-                  content="scope.row.address"
+                <span
+                  class="threeLine"
+                  slot="reference"
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
+                  "
                 >
-                  <span
-                    class="threeLine"
-                    slot="reference"
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    <!-- {{ scope.row.customer_code }} -->
-                  </span>
-                </el-popover>
+                  {{ scope.row.customer_code }}
+                </span>
               </div>
             </template>
           </el-table-column>
@@ -151,24 +148,17 @@
                   flex-direction: column;
                 "
               >
-                <el-popover
-                  placement="top-start"
-                  min-width="200%"
-                  trigger="hover"
-                  content="scope.row.address"
+                <span
+                  class="threeLine"
+                  slot="reference"
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
+                  "
                 >
-                  <span
-                    class="threeLine"
-                    slot="reference"
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    <!-- {{ scope.row.product_code }} -->
-                  </span>
-                </el-popover>
+                  {{ scope.row.product_code }}
+                </span>
               </div>
             </template>
           </el-table-column>
@@ -191,7 +181,7 @@
                   placement="top-start"
                   min-width="200%"
                   trigger="hover"
-                  content="scope.row.address"
+                  :content="scope.row.product_name"
                 >
                   <span
                     class="threeLine"
@@ -202,7 +192,7 @@
                       text-align: start !important;
                     "
                   >
-                    <!-- {{ scope.row.product_name }} -->
+                    {{ scope.row.product_name }}
                   </span>
                 </el-popover>
               </div>
@@ -223,42 +213,16 @@
                   flex-direction: column;
                 "
               >
-                <div
-                  v-for="(item, index) in scope.row.inblound_infos"
-                  :key="index"
+                <span
+                  slot="reference"
                   style="
-                    height: 135px;
-                    position: relative;
-                    text-align: start;
-                    border-top: 1px solid #ebeef5;
-                    margin-top: -2px;
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
                   "
                 >
-                  <span
-                    v-if="
-                      !(
-                        showIndex == scope.row.customer_code &&
-                        showTime == item.create_time
-                      )
-                    "
-                    slot="reference"
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    <!-- {{ item.number }} -->
-                  </span>
-                  <el-input
-                    v-if="
-                      showIndex == scope.row.customer_code &&
-                      showTime == item.create_time
-                    "
-                    placeholder="请输入"
-                    v-model="perInfo.number"
-                  ></el-input>
-                </div>
+                  {{ scope.row.number }}
+                </span>
               </div>
             </template>
           </el-table-column>
@@ -277,42 +241,16 @@
                   flex-direction: column;
                 "
               >
-                <div
-                  v-for="(item, index) in scope.row.inblound_infos"
-                  :key="index"
+                <span
+                  slot="reference"
                   style="
-                    height: 135px;
-                    position: relative;
-                    text-align: start;
-                    border-top: 1px solid #ebeef5;
-                    margin-top: -2px;
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
                   "
                 >
-                  <span
-                    v-if="
-                      !(
-                        showIndex == scope.row.customer_code &&
-                        showTime == item.create_time
-                      )
-                    "
-                    slot="reference"
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    <!-- {{ item.number }} -->
-                  </span>
-                  <el-input
-                    v-if="
-                      showIndex == scope.row.customer_code &&
-                      showTime == item.create_time
-                    "
-                    placeholder="请输入"
-                    v-model="perInfo.number"
-                  ></el-input>
-                </div>
+                  {{ scope.row.not_out_number }}
+                </span>
               </div>
             </template>
           </el-table-column>
@@ -331,42 +269,16 @@
                   flex-direction: column;
                 "
               >
-                <div
-                  v-for="(item, index) in scope.row.inblound_infos"
-                  :key="index"
+                <span
+                  slot="reference"
                   style="
-                    height: 135px;
-                    position: relative;
-                    text-align: start;
-                    border-top: 1px solid #ebeef5;
-                    margin-top: -2px;
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
                   "
                 >
-                  <span
-                    v-if="
-                      !(
-                        showIndex == scope.row.customer_code &&
-                        showTime == item.create_time
-                      )
-                    "
-                    slot="reference"
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    <!-- {{ item.number }} -->
-                  </span>
-                  <el-input
-                    v-if="
-                      showIndex == scope.row.customer_code &&
-                      showTime == item.create_time
-                    "
-                    placeholder="请输入"
-                    v-model="perInfo.number"
-                  ></el-input>
-                </div>
+                  {{ scope.row.out_total }}
+                </span>
               </div>
             </template>
           </el-table-column>
@@ -385,42 +297,16 @@
                   flex-direction: column;
                 "
               >
-                <div
-                  v-for="(item, index) in scope.row.inblound_infos"
-                  :key="index"
+                <span
+                  slot="reference"
                   style="
-                    height: 135px;
-                    position: relative;
-                    text-align: start;
-                    border-top: 1px solid #ebeef5;
-                    margin-top: -2px;
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
                   "
                 >
-                  <span
-                    v-if="
-                      !(
-                        showIndex == scope.row.customer_code &&
-                        showTime == item.create_time
-                      )
-                    "
-                    slot="reference"
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    <!-- {{ item.number }} -->
-                  </span>
-                  <el-input
-                    v-if="
-                      showIndex == scope.row.customer_code &&
-                      showTime == item.create_time
-                    "
-                    placeholder="请输入"
-                    v-model="perInfo.number"
-                  ></el-input>
-                </div>
+                  {{ scope.row.price }}
+                </span>
               </div>
             </template>
           </el-table-column>
@@ -439,42 +325,44 @@
                   flex-direction: column;
                 "
               >
-                <div
-                  v-for="(item, index) in scope.row.inblound_infos"
-                  :key="index"
+                <span
+                  slot="reference"
                   style="
-                    height: 135px;
-                    position: relative;
-                    text-align: start;
-                    border-top: 1px solid #ebeef5;
-                    margin-top: -2px;
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
                   "
                 >
-                  <span
-                    v-if="
-                      !(
-                        showIndex == scope.row.customer_code &&
-                        showTime == item.create_time
-                      )
-                    "
-                    slot="reference"
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    <!-- {{ item.number }} -->
-                  </span>
-                  <el-input
-                    v-if="
-                      showIndex == scope.row.customer_code &&
-                      showTime == item.create_time
-                    "
-                    placeholder="请输入"
-                    v-model="perInfo.number"
-                  ></el-input>
-                </div>
+                  {{ scope.row.out_total * scope.row.price }}
+                </span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="未开发票额"
+            align="center"
+            width="100"
+            class-name="li"
+          >
+            <template slot-scope="scope">
+              <div
+                style="
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <span
+                  slot="reference"
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
+                  "
+                >
+                  {{ scope.row.not_amount || scope.row.product_rece_total }}
+                </span>
               </div>
             </template>
           </el-table-column>
@@ -493,28 +381,14 @@
                   flex-direction: column;
                 "
               >
-                <!-- <div v-for="(item, index) in scope.row.inblound_infos" :key="index" style="
-                  height: 135px;
-                  position: relative;
-                  text-align: start;
-                  border-top: 1px solid #ebeef5;
-                  margin-top: -2px;
-                "> -->
-                <!-- <span 
-                  v-if=
-                   slot="reference" style="
-                  display: flex;
-                  justify-content: start;
-                  text-align: start !important;
-                ">
-
-                  </span> -->
-                <el-input placeholder="请输入" v-model="a"></el-input>
-                <!-- </div> -->
+                <el-input
+                  placeholder="请输入"
+                  @change="checkPrice(scope)"
+                  v-model="perNum[scope.$index]"
+                ></el-input>
               </div>
             </template>
           </el-table-column>
-
           <el-table-column
             align="center"
             label="操作"
@@ -524,25 +398,12 @@
             style="border-left: 1px solid #ebeef5"
           >
             <template slot-scope="scope" style="display: flex">
-              <!-- <div v-for="(item, index) in scope.row.inblound_infos" :key="index" style="
-                  height: 135px;
-                  position: relative;
-                  text-align: start;
-                  border-top: 1px solid #ebeef5;
-                  margin-top: -2px;
-                  display: flex;
-                  flex-wrap: wrap;
-                  justify-content: center;
-                  align-content: center;
-                "
-                > -->
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
-              <!-- </div> -->
             </template>
           </el-table-column>
         </el-table>
@@ -550,7 +411,7 @@
     </el-drawer>
     <!-- //开发票记录 -->
     <el-drawer
-      title="开票记录"
+      title="发票收款"
       :visible.sync="visibleClear"
       @close="closeClear"
       size="60%"
@@ -579,15 +440,15 @@
       <div style="display: flex; flex-wrap: wrap" class="info">
         <div style="width: 33%">
           <div>客户名称</div>
-          <div>aaaaa</div>
+          <div>{{ customerInfo.company_name }}</div>
         </div>
         <div style="width: 33%">
           <div>订单号</div>
-          <div>bbbbb</div>
+          <div>{{ customerInfo.order_number }}</div>
         </div>
         <div style="width: 33%">
           <div>结款状态</div>
-          <div>ccccc</div>
+          <div>{{ customerInfo.bill_status == 0 ? "进行中" : "已完成" }}</div>
         </div>
       </div>
       <!-- // -->
@@ -611,7 +472,7 @@
           border
           stripe
           highlight-current-row
-          :data="list"
+          :data="invoicHistoryList"
           :row-style="{ height: '100px' }"
         >
           <el-table-column
@@ -640,11 +501,11 @@
                 "
               >
                 <div
-                  v-for="(item, index) in scope.row.num"
+                  v-for="(item, index) in scope.row.receipt_infos"
                   :key="index"
                   style="width: 100%; border-bottom: 1px solid #ebeef5"
                 >
-                  <span>NS124235453</span>
+                  <span>{{ item.customer_code }}</span>
                 </div>
               </div>
             </template>
@@ -665,11 +526,11 @@
                 "
               >
                 <div
-                  v-for="(item, index) in scope.row.num"
+                  v-for="(item, index) in scope.row.receipt_infos"
                   :key="index"
                   style="width: 100%; border-bottom: 1px solid #ebeef5"
                 >
-                  <span>NS124235453</span>
+                  <span>{{ item.product_code }}</span>
                 </div>
               </div>
             </template>
@@ -690,11 +551,11 @@
                 "
               >
                 <div
-                  v-for="(item, index) in scope.row.num"
+                  v-for="(item, index) in scope.row.receipt_infos"
                   :key="index"
                   style="width: 100%; border-bottom: 1px solid #ebeef5"
                 >
-                  <span>NS124235453</span>
+                  <span>{{ item.product_name }}</span>
                 </div>
               </div>
             </template>
@@ -715,11 +576,11 @@
                 "
               >
                 <div
-                  v-for="(item, index) in scope.row.num"
+                  v-for="(item, index) in scope.row.receipt_infos"
                   :key="index"
                   style="width: 100%; border-bottom: 1px solid #ebeef5"
                 >
-                  <span>1000003</span>
+                  <span>{{ item.out_total }}</span>
                 </div>
               </div>
             </template>
@@ -740,11 +601,11 @@
                 "
               >
                 <div
-                  v-for="(item, index) in scope.row.num"
+                  v-for="(item, index) in scope.row.receipt_infos"
                   :key="index"
                   style="width: 100%; border-bottom: 1px solid #ebeef5"
                 >
-                  <span>1000003</span>
+                  <span>{{ item.price }}</span>
                 </div>
               </div>
             </template>
@@ -765,11 +626,13 @@
                 "
               >
                 <div
-                  v-for="(item, index) in scope.row.num"
+                  v-for="(item, index) in scope.row.receipt_infos"
                   :key="index"
                   style="width: 100%; border-bottom: 1px solid #ebeef5"
                 >
-                  <span>1000003</span>
+                  <span>
+                    {{ item.product_rece_total }}
+                  </span>
                 </div>
               </div>
             </template>
@@ -789,42 +652,7 @@
                   flex-direction: column;
                 "
               >
-                <div
-                  v-for="(item, index) in scope.row.inblound_infos"
-                  :key="index"
-                  style="
-                    height: 135px;
-                    position: relative;
-                    text-align: start;
-                    border-top: 1px solid #ebeef5;
-                    margin-top: -2px;
-                  "
-                >
-                  <span
-                    v-if="
-                      !(
-                        showIndex == scope.row.customer_code &&
-                        showTime == item.create_time
-                      )
-                    "
-                    slot="reference"
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    <!-- {{ item.number }} -->
-                  </span>
-                  <el-input
-                    v-if="
-                      showIndex == scope.row.customer_code &&
-                      showTime == item.create_time
-                    "
-                    placeholder="请输入"
-                    v-model="perInfo.number"
-                  ></el-input>
-                </div>
+                {{ scope.row.rece_total }}
               </div>
             </template>
           </el-table-column>
@@ -835,14 +663,14 @@
             class-name="li"
           >
             <template slot-scope="scope">
-              {{ 1000 }}
+              {{ scope.row.receipt_amount }}
             </template>
           </el-table-column>
           <el-table-column
             label="发票图片"
             align="center"
             width="100"
-            class-name="li"
+            class-name="li image"
           >
             <template slot-scope="scope">
               <div style="height: 100%; width: 100%">
@@ -856,23 +684,44 @@
                   "
                 >
                   <el-image
-                    fit="contain"
-                    :src="imageList[0][0]"
-                    :preview-src-list="imageList[0]"
-                  >
-                    <div slot="error" class="image-slot">
-                      <i class="el-icon-picture-outline"></i>
-                    </div>
-                  </el-image>
+                    style="position: relative"
+                    :src="'http://192.168.1.122:8080' + scope.row.receipt_image"
+                    :preview-src-list="[
+                      'http://192.168.1.122:8080' + scope.row.receipt_image,
+                    ]"
+                  ></el-image>
                 </div>
               </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="发票号"
+            align="center"
+            width="100"
+            class-name="li"
+          >
+            <template slot-scope="scope">
+              {{ scope.row.receipt_number }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="开票日期"
+            align="center"
+            width="170"
+            class-name="li"
+          >
+            <template slot-scope="scope">
+              <i class="el-icon-time" />
+              <span>
+                {{ scope.row.create_time }}
+              </span>
             </template>
           </el-table-column>
           <el-table-column
             label="实收金额"
             align="center"
             width="100"
-            class-name="li inputLi"
+            class-name="li"
           >
             <template slot-scope="scope">
               <div
@@ -883,16 +732,29 @@
                   flex-direction: column;
                 "
               >
-                <span
-                  slot="reference"
-                  style="
-                    display: flex;
-                    justify-content: start;
-                    text-align: start !important;
-                  "
-                >
-                  1111
-                </span>
+                {{ scope.row.amount }}
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="未收金额"
+            align="center"
+            width="100"
+            class-name="li"
+          >
+            <template slot-scope="scope">
+              <div
+                style="
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                {{
+                  new Number(scope.row.receipt_amount) -
+                  new Number(scope.row.amount)
+                }}
               </div>
             </template>
           </el-table-column>
@@ -903,31 +765,29 @@
             class-name="li index"
           >
             <template slot-scope="scope">
-              <!-- <el-tag :type="scope.row.status | statusFilter">{{
-                scope.row.status == 0 ? "进行中" : "已完成"
-            }}</el-tag> -->
+              <el-tag
+                effect="dark"
+                :type="scope.row.bill_status | statusFilter"
+                >{{ scope.row.bill_status == 0 ? "进行中" : "已完成" }}</el-tag
+              >
             </template>
           </el-table-column>
-          <el-table-column
-            label="开票日期"
-            align="center"
-            width="170"
-            class-name="li index"
-          >
-            <template slot-scope="scope"> </template>
-          </el-table-column>
+
           <el-table-column
             align="center"
             label="操作"
             fixed="right"
             width="200"
             class="operation"
-            class-name="button editButton pay"
+            class-name="button editButton pay to"
             style="border-left: 1px solid #ebeef5"
           >
             <template slot-scope="scope" style="display: flex">
               <el-button type="info" size="small"></el-button>
-              <el-button type="primary" size="small" @click="openCollection"
+              <el-button
+                type="primary"
+                size="small"
+                @click="openCollection(scope)"
                 >收款</el-button
               >
               <el-button type="info" size="small"></el-button>
@@ -939,13 +799,14 @@
         </el-table>
       </div>
     </el-drawer>
-    <!--  -->
+    <!-- 收款记录 -->
     <el-drawer
       title="收款"
       :visible.sync="visibleCollection"
       class="collection operation"
       class-name="button t pay"
       @close="closeCollection"
+      :before-close="closeCollectBefore"
     >
       <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0"></div>
       <div style="padding-left: 20px">操作</div>
@@ -967,7 +828,7 @@
           border
           stripe
           highlight-current-row
-          :data="list"
+          :data="collectList"
           :row-style="{ height: '100px' }"
         >
           <el-table-column
@@ -987,14 +848,14 @@
             class-name="li"
           >
             <template slot-scope="scope">
-              {{ 1000 }}
+              {{ scope.row.receipt_amount }}
             </template>
           </el-table-column>
           <el-table-column
             label="发票图片"
             align="center"
-            width="100"
-            class-name="li"
+            width="150"
+            class-name="li image"
           >
             <template slot-scope="scope">
               <div style="height: 100%; width: 100%">
@@ -1007,15 +868,20 @@
                     left: 0;
                   "
                 >
+                  <!-- <el-image
+                    style="position: relative"
+                    :src="'http://192.168.1.122:8080' + scope.row.receipt_image"
+                    :preview-src-list="[
+                      'http://192.168.1.122:8080' + scope.row.receipt_image,
+                    ]"
+                  ></el-image> -->
                   <el-image
-                    fit="contain"
-                    :src="imageList[0][0]"
-                    :preview-src-list="imageList[0]"
-                  >
-                    <div slot="error" class="image-slot">
-                      <i class="el-icon-picture-outline"></i>
-                    </div>
-                  </el-image>
+                    style="position: relative"
+                    :src="'http://tongyu.devapi.ltokay.cn' + scope.row.receipt_image"
+                    :preview-src-list="[
+                      'http://tongyu.devapi.ltokay.cn' + scope.row.receipt_image,
+                    ]"
+                  ></el-image>
                 </div>
               </div>
             </template>
@@ -1024,7 +890,7 @@
             label="实收金额"
             align="center"
             min-width="100"
-            class-name="li inputLi"
+            class-name="li"
           >
             <template slot-scope="scope">
               <div
@@ -1043,20 +909,16 @@
                     text-align: start !important;
                   "
                 >
-                  <!-- {{ item.number }} -->
+                  {{ scope.row.amount }}
                 </span>
-                <!-- <el-input
-                 placeholder="请输入"
-                 v-model="a"
-               ></el-input> -->
               </div>
             </template>
           </el-table-column>
           <el-table-column
             label="回执单图片"
             align="center"
-            width="100"
-            class-name="li"
+            width="150"
+            class-name="li image"
           >
             <template slot-scope="scope">
               <div style="height: 100%; width: 100%">
@@ -1069,17 +931,21 @@
                     left: 0;
                   "
                 >
+                  <!-- <el-image
+                    style="position: relative"
+                    :src="'http://192.168.1.122:8080' + scope.row.proof_image"
+                    :preview-src-list="[
+                      'http://192.168.1.122:8080' + scope.row.proof_image,
+                    ]"
+                  ></el-image> -->
                   <el-image
-                    fit="contain"
-                    :src="imageList[0][0]"
-                    :preview-src-list="imageList[0]"
-                  >
-                    <div slot="error" class="image-slot">
-                      <i class="el-icon-picture-outline"></i>
-                    </div>
-                  </el-image>
+                    style="position: relative"
+                    :src="'http://tongyu.devapi.ltokay.cn' + scope.row.proof_image"
+                    :preview-src-list="[
+                      'http://tongyu.devapi.ltokay.cn' + scope.row.proof_image,
+                    ]"
+                  ></el-image>
                 </div>
-                <!-- <input v-if="!imageList[0][0]" type="file" @change="inputFile" style="position:absolute;top:0;right:0;bottom:0;left:0;opacity: 0;"> -->
               </div>
             </template>
           </el-table-column>
@@ -1087,7 +953,7 @@
             label="凭证号"
             align="center"
             min-width="150"
-            class-name="li inputLi"
+            class-name="li"
           >
             <template slot-scope="scope">
               <div
@@ -1106,6 +972,7 @@
                     text-align: start !important;
                   "
                 >
+                  {{ scope.row.proof_number }}
                 </span>
               </div>
             </template>
@@ -1121,8 +988,8 @@
             style="border-left: 1px solid #ebeef5"
           >
             <template slot-scope="scope" style="display: flex">
-              <el-button type="primary" size="small"></el-button>
-              <el-button type="primary" size="small"></el-button>
+              <el-button type="info" size="small"></el-button>
+              <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
@@ -1151,6 +1018,7 @@
         stripe
         fit
         highlight-current-row
+        class-name="lis"
       >
         <el-table-column
           align="center"
@@ -1159,7 +1027,7 @@
           class-name="li hei"
         >
           <template slot-scope="scope">
-            {{( scope.$index +1)}}
+            {{ scope.$index + 1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -1169,7 +1037,7 @@
           class-name="li"
         >
           <template slot-scope="scope">
-            {{ scope.row.$id }}
+            {{ scope.row.company_name }}
           </template>
         </el-table-column>
         <el-table-column
@@ -1178,7 +1046,9 @@
           width="200"
           class-name="li"
         >
-          <template slot-scope="scope"> </template>
+          <template slot-scope="scope">
+            {{ scope.row.order_number }}
+          </template>
         </el-table-column>
         <el-table-column
           label="客户料号"
@@ -1196,11 +1066,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>NS124235453</span>
+                <span>{{ item.customer_code }}</span>
               </div>
             </div>
           </template>
@@ -1221,11 +1091,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>NS124235453</span>
+                <span>{{ item.product_code }}</span>
               </div>
             </div>
           </template>
@@ -1246,11 +1116,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>NS124235453</span>
+                <span>{{ item.product_name }}</span>
               </div>
             </div>
           </template>
@@ -1271,11 +1141,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>1000003</span>
+                <span>{{ item.number }}</span>
               </div>
             </div>
           </template>
@@ -1296,11 +1166,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>1000003</span>
+                <span>{{ item.price }}</span>
               </div>
             </div>
           </template>
@@ -1321,11 +1191,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>1000003</span>
+                <span>{{ item.price * item.number }}</span>
               </div>
             </div>
           </template>
@@ -1346,11 +1216,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>1000003</span>
+                <span>{{ item.not_out_number }}</span>
               </div>
             </div>
           </template>
@@ -1371,11 +1241,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>1000003</span>
+                <span>{{ item.out_total }}</span>
               </div>
             </div>
           </template>
@@ -1391,11 +1261,11 @@
               "
             >
               <div
-                v-for="(item, index) in scope.row.num"
+                v-for="(item, index) in scope.row.order_infos"
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>1000003</span>
+                <span>{{ item.product_rece_total }}</span>
               </div>
             </div>
           </template>
@@ -1411,7 +1281,7 @@
               "
             >
               <!-- <div v-for="(item,index) in scope.row.num" :key="index" style="width:100%;border-bottom:1px solid #ebeef5;"> -->
-              <span>1000003</span>
+              <span>{{ scope.row.rece_total }}</span>
               <!-- </div> -->
             </div>
           </template>
@@ -1427,7 +1297,7 @@
               "
             >
               <!-- <div v-for="(item,index) in scope.row.num" :key="index" style="width:100%;border-bottom:1px solid #ebeef5;"> -->
-              <span>1000003</span>
+              <span>{{ scope.row.invoice_amount }}</span>
               <!-- </div> -->
             </div>
           </template>
@@ -1443,7 +1313,7 @@
               "
             >
               <!-- <div v-for="(item,index) in scope.row.num" :key="index" style="width:100%;border-bottom:1px solid #ebeef5;"> -->
-              <span>1000003</span>
+              <span>{{ scope.row.amount }}</span>
               <!-- </div> -->
             </div>
           </template>
@@ -1455,9 +1325,11 @@
           class-name="li index"
         >
           <template slot-scope="scope">
-            <!-- <el-tag :type="scope.row.status | statusFilter">{{
-                scope.row.status == 0 ? "进行中" : "已完成"
-            }}</el-tag> -->
+            <el-tag
+              effect="dark"
+              :type="scope.row.bill_status | statusFilter"
+              >{{ scope.row.bill_status == 0 ? "进行中" : "已完成" }}</el-tag
+            >
           </template>
         </el-table-column>
 
@@ -1467,7 +1339,7 @@
           fixed="right"
           width="200"
           class="operation"
-          class-name="button t pay"
+          class-name="button t pay "
           style="border-left: 1px solid #ebeef5"
         >
           <template
@@ -1475,12 +1347,12 @@
             style="display: flex; flex-wrap: wrap"
             class="operation"
           >
-            <el-button type="primary" size="small" @click="openInfo"
-              >开票</el-button
-            >
-            <el-button type="primary" size="small" @click="openClear"
-              >发票收款</el-button
-            >
+            <el-button type="primary" size="small" @click="openInfo(scope)">
+              开票
+            </el-button>
+            <el-button type="primary" size="small" @click="openClear(scope)">
+              发票收款
+            </el-button>
             <el-button type="info" size="small"></el-button>
             <el-button type="info" size="small"></el-button>
             <el-button type="info" size="small"></el-button>
@@ -1507,47 +1379,124 @@
 </template>
 
 <script>
-import { getList } from "@/api/table";
+import {
+  getList,
+  getCollectionList,
+  Invoicing,
+  invoiceHistory,
+  Receipt,
+  collectList,
+  invoiceDe
+} from "@/api/table";
 import Search from "@/components/Search/index.vue";
+import throttle from "lodash/throttle";
+import cloneDeep from "lodash/cloneDeep";
 
 export default {
+  mounted() {
+    this.$bus.$on("storage", this.invoic);
+    this.$bus.$on("goSearch", this.search);
+  },
+  beforeDestroy() {
+    this.$bus.$off();
+  },
   components: {
     Search,
   },
   filters: {
     statusFilter(status) {
       const statusMap = {
-        published: "success",
-        draft: "gray",
-        deleted: "danger",
+        1: "success",
+        0: "danger",
       };
       return statusMap[status];
     },
   },
   data() {
     return {
-      list: [
-        { id: 1, num: [{ id: 1 }, { id: 2 }] },
-        { id: 2, num: [{ id: 1 }] },
-        { id: 3, num: [{ id: 1 }] },
-      ],
+      show:true,
+      list: [],
+      invoicList: [],
+      invoicHistoryList: [],
+      collectList: [],
       listLoading: false,
       visibleInfo: false,
       visibleClear: false,
       visibleCollection: false,
       a: null,
+      alist: [{ id: 1 }],
+      customerInfo: {},
       //
       page_size: 50,
       page_current: 1,
       page_total: 1000,
       //
       imageList: [[]],
+      orderID: null,
+      perNum: [],
+      rece_total: 0,
+      //
+      isHistory: false,
+      isCollection: false,
+      receiptID: null,
+      orderID: null,
     };
   },
   created() {
-    // this.fetchData()
+    this.fetchData();
+  },
+  computed: {
+    invoice_total() {
+      if (this.perNum.length > 0) {
+        return this.perNum.reduce((pre, cur) => {
+          return new Number(pre) + new Number(cur);
+        });
+      } else {
+        return 0;
+      }
+    },
   },
   methods: {
+    search(searchInfo) {
+      if (!this.isHistory) {
+        let newSearch = cloneDeep(searchInfo);
+        if (newSearch[5]) {
+          newSearch[5] = newSearch[5].split("/");
+        }
+        if (newSearch[6]) {
+          newSearch[6] = newSearch[6].split("/");
+        }
+        if (newSearch[7]) {
+          newSearch[7] = newSearch[7].split("/");
+        }
+        this.fetchData(newSearch);
+      } else {
+        invoiceHistory(this.orderID, searchInfo[0]).then((res) => {
+          this.invoicHistoryList = res.data.res;
+        });
+      }
+    },
+    checkPrice(scope) {
+      if (scope.row.not_amount) {
+        if (new Number(scope.row.not_amount) < this.perNum[scope.$index]) {
+          this.$message({
+            message: "输入的发票额过大",
+            type: "error",
+          });
+          this.$set(this.perNum, scope.$index, 0);
+        }
+      } else {
+        if (
+          new Number(scope.row.product_rece_total) < this.perNum[scope.$index]
+        ) {
+          this.$message({
+            message: "输入的发票额过大",
+            type: "error",
+          });
+          this.$set(this.perNum, scope.$index, 0);
+        }
+      }
+    },
     inputFile(e) {
       console.log(e.target.files);
       let src = window.URL.createObjectURL(e.target.files[0]);
@@ -1559,31 +1508,137 @@ export default {
     sizeChange(size) {
       this.page_size = size;
     },
-    openInfo() {
+    openInfo(scope) {
+      console.log(scope.row);
+      invoiceDe(scope.row.order_id).then((res)=>{
+        this.invoicList = res.data.res[0].order_infos;
+      })
+      this.show = true;
+      this.customerInfo = scope.row;
+      // this.invoicList = scope.row.order_infos;
+      this.orderId = scope.row.order_id;
       this.visibleInfo = true;
+      for (const iterator of scope.row.order_infos) {
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        this.rece_total += new Number(iterator.product_rece_total);
+      }
+    },
+    removeImg(){
+      // this.$refs.search1.remove([]);
+      // this.$bus.$emit("edit", []);
+      this.show=false;
+      this.$nextTick(()=>{
+        // this.show=true;
+      })
+      this.visibleInfo =false;
     },
     closeInfo() {
+      // this.$bus.$emit("edit", []);
+    
+
+      this.rece_total = 0;
+      this.perNum.length = 0;
       this.visibleInfo = false;
+      this.fetchData();
+    },
+    //开发票
+    invoic(searchInfo) {
+      //不是收款界面
+      console.log(this.isCollection);
+      if (!this.isCollection) {
+        console.log('@');
+        let data = new FormData();
+        data.append("receipt_number", searchInfo[0]);
+        data.append("receipt_image", searchInfo[1]);
+        data.append("order_id", this.orderId);
+        let arr = [];
+        for (const index in this.invoicList) {
+          let obj = {};
+          if (
+            this.perNum[index] == "" ||
+            this.perNum[index] == undefined ||
+            this.perNum[index] == 0
+          ) {
+            continue;
+          }
+          obj.order_product_id = this.invoicList[index].order_product_id;
+          obj.amount =
+            this.perNum[index] == ("" || undefined) ? 0 : this.perNum[index];
+          arr.push(obj);
+        }
+        data.append("receipt_infos", JSON.stringify(arr));
+        // Invoicing(data).then((res) => {
+        //   // console.log(res);
+        //   this.closeInfo();
+        // });
+      } else {
+        let data = new FormData();
+        data.append("receipt_id", this.receiptID);
+        data.append("proof_number", searchInfo[1]);
+        data.append("amount", searchInfo[0]);
+        data.append("proof_image", searchInfo[2]);
+
+        Receipt(data).then((res) => {
+          collectList(this.receiptID).then((res) => {
+            this.collectList = res.data.res;
+          });
+        });
+      }
     },
     //
-    openClear() {
+    openClear(scope) {
+      this.isHistory = true;
+      this.orderID = scope.row.order_id;
+      invoiceHistory(scope.row.order_id).then((res) => {
+        console.log("@", res);
+        this.invoicHistoryList = res.data.res;
+      });
       this.visibleClear = true;
     },
     closeClear() {
+      this.isHistory = false;
       this.visibleClear = false;
+      this.fetchData();
+      // this.$bus.$emit('edit',[]);
     },
     //
-    openCollection() {
+    openCollection(scope) {
+      this.receiptID = scope.row.receipt_id;
+      this.isCollection = true;
+      collectList(scope.row.receipt_id).then((res) => {
+        this.collectList = res.data.res;
+        // this.$bus.$emit("edit", []);
+      });
       this.visibleCollection = true;
     },
     closeCollection() {
+      // this.$bus.$emit("edit", []);
+      this.receiptID = null;
+      this.isCollection = false;
+      this.visibleCollection = false;
+      invoiceHistory(this.orderID).then((res) => {
+        this.invoicHistoryList = res.data.res;
+      });
+      this.fetchData();
+    },
+    closeCollectBefore() {
+      this.$bus.$emit('edit',[]);
       this.visibleCollection = false;
     },
-    fetchData() {
+    fetchData(searchInfo) {
       this.listLoading = true;
-      getList().then((response) => {
-        this.list = response.data.items;
+      if (!searchInfo) {
+        searchInfo = ["", "", "", "", "", "", "", "", ""];
+      }
+      getCollectionList({
+        params: searchInfo,
+        size: this.page_size,
+        current: this.page_current,
+      }).then((res) => {
+        this.page_total = res.data.res.total;
+        this.list = res.data.res.data;
         this.listLoading = false;
+        console.log(1, res.data.res.data);
       });
     },
   },
@@ -1615,16 +1670,14 @@ export default {
   }
 }
 
-.hei {
-  min-height: 127px !important;
-}
+
 
 .payInfo {
   .el-drawer {
     // overflow:auto;
     min-width: 1500px;
     padding: 0 10px;
-
+    overflow: auto;
     .el-drawer__body {
       position: relative;
     }
@@ -1695,6 +1748,22 @@ export default {
   .el-drawer {
     padding: 0 10px;
     min-width: 1400px;
+    .el-drawer__body {
+      // padding: 0 10px;
+    }
   }
 }
+.image {
+  .cell {
+    width: 100%;
+    height: 100%;
+  }
+}
+.to{
+  margin-top: 10px;
+}
+  .hei {
+  min-height: 127px !important;
+}
+
 </style>
