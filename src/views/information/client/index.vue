@@ -10,7 +10,7 @@
       :button="[
         { title: '搜索', type: '',if:true },
         { title: '重置', type: '' ,if:true},
-        { title: '添加', type: 'primary',if:true },
+        { title: '添加', type: 'primary',if:addC },
       ]"
     ></Search>
     <!-- //分页
@@ -34,12 +34,17 @@
       :visible.sync="visibleDialog"
       @close="shutDownDialog"
       class="drawerInput"
+      ref="add"
+      @mousedown.native="handleWrapperMousedown($event,'add')"
+      @mouseup.native="handleWrapperMouseup($event,'add')"
+      :wrapperClosable="false"
     >
       <el-form
         :model="clientInfo"
         label-width="100px"
         :rules="rulesClient"
         ref="clientForm"
+        style="margin:20px"
       >
         <el-form-item label="客户名称" prop="companyName">
           <el-input
@@ -111,12 +116,17 @@
       title="添加负责人"
       :visible.sync="visibleDialog_Person"
       @close="shutDownDialog_person"
+      ref="pers"
+      @mousedown.native="handleWrapperMousedown($event,'pers')"
+      @mouseup.native="handleWrapperMouseup($event,'pers')"
+      :wrapperClosable="false"
     >
       <el-form
         :model="personInfo"
         label-width="100px"
         :rules="rulesPerson"
         ref="personForm"
+        style="margin:20px;"
       >
         <el-form-item label="姓名" prop="name">
           <el-input
@@ -149,6 +159,10 @@
       direction="rtl"
       size="65%"
       @close="drawer = false"
+      ref="his"
+      @mousedown.native="handleWrapperMousedown($event,'his')"
+      @mouseup.native="handleWrapperMouseup($event,'his')"
+      :wrapperClosable="false"
     >
       <div class="drawer">
         <el-table
@@ -162,7 +176,7 @@
           fit
           :row-style="{ height: '59px' }"
         >
-          <el-table-column label="序号" min-width="60px" align="center">
+          <el-table-column label="序号" min-width="60px" align="center" class-name="first">
             <template slot-scope="scope"> {{ scope.$index + 1 }} </template>
           </el-table-column>
           <el-table-column label="姓名" min-width="100px" align="center">
@@ -201,18 +215,22 @@
                 type="primary"
                 size="small"
                 @click="editDrawer_person(scope.row)"
+                v-if="editP"
                 >编辑</el-button
               >
+              <el-button type="info" size="small" v-if="!editP"></el-button>
               <el-popconfirm
                 title="确定删除吗？"
                 icon="el-icon-info"
                 icon-color="red"
                 @onConfirm="deleteDrawer_person(scope.row)"
               >
-                <el-button type="danger" size="small" slot="reference">
+                <el-button type="danger" size="small" slot="reference" v-if="deleteP">
                   删除
                 </el-button>
               </el-popconfirm>
+              <el-button type="info" size="small" v-if="!deleteP"></el-button>
+
             </template>
           </el-table-column>
         </el-table>
@@ -234,7 +252,7 @@
         @sort-change="sort"
         :header-cell-style="{left:0,right:0}"
       >
-        <el-table-column align="center" label="序号" width="50" class-name="li">
+        <el-table-column align="center" label="序号" width="50" class-name="li first">
           <template slot-scope="scope">
             {{ scope.$index + 1 }}
             <!-- 99999 -->
@@ -343,30 +361,44 @@
               type="primary"
               size="small"
               @click="showDrawer(scope.row)"
+              v-if="infoP"
               >负责人信息</el-button
             >
+            <el-button type="info" size="small" v-if="!infoP"></el-button>
+
+
             <el-button
               type="primary"
               size="small"
               @click="showDialog_person(scope.row)"
+              v-if="addP"
               >添加负责人</el-button
             >
+            <el-button type="info" size="small" v-if="!addP"></el-button>
+
+
             <el-button
               type="primary"
               size="small"
               @click="editDialog(scope.row)"
+              v-if="editC"
               >编辑</el-button
             >
+            <el-button type="info" size="small" v-if="!editC"></el-button>
+
+
             <el-popconfirm
               title="确定删除吗？"
               icon="el-icon-info"
               icon-color="red"
               @onConfirm="deleteClient(scope.row)"
             >
-              <el-button type="danger" size="small" slot="reference">
+              <el-button type="danger" size="small" slot="reference" v-if="deleteC">
                 删除
               </el-button>
             </el-popconfirm>
+            <el-button type="info" size="small" v-if="!deleteC"></el-button>
+
 
             <el-button type="info" size="small"></el-button>
             <el-button type="info" size="small"></el-button>
@@ -417,6 +449,28 @@ export default {
       };
       return statusMap[status];
     },
+  },
+  computed:{
+    auth_id(){
+      return localStorage.getItem('auth_id').split(',');
+    },
+    addC(){
+      return this.auth_id.includes('33');
+    },
+    editC(){
+      return this.auth_id.includes('34');
+    },deleteC(){
+      return this.auth_id.includes('35');
+    },infoP(){
+      return this.auth_id.includes('36');
+    },addP(){
+      return this.auth_id.includes('37');
+    },editP(){
+      return this.auth_id.includes('38');
+    },deleteP(){
+      return this.auth_id.includes('39');
+    },
+
   },
   data() {
     let check_companyName = (rule, value, callback) => {
@@ -506,6 +560,10 @@ export default {
         phone: "",
         email: "",
       },
+      //
+      classmodel:null,
+
+      //
       rulesClient: {
         companyName: [
           { required: true, message: "请输入", trigger: "blur" },
@@ -813,6 +871,21 @@ export default {
     },
     sizeChange(size) {
       this.page_size = size;
+    },
+    handleWrapperMousedown(e, product) {
+      // 如果为true，则表示点击发生在遮罩层
+      this.classmodel = !!e.target.classList.contains("el-drawer__container");
+    },
+    handleWrapperMouseup(e, product) {
+      if (
+        !!e.target.classList.contains("el-drawer__container") &&
+        this.classmodel
+      ) {
+        this.$refs[product].closeDrawer();
+      } else {
+        this.product = true;
+      }
+      this.classmodel = false;
     },
   },
 };

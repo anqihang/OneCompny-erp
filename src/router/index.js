@@ -121,8 +121,9 @@ export const constantRoutes = [
   {
     path: "/depot",
     component: Layout,
-    redirect: "/depot/depotHistory",
+    // redirect: "/depot/depotHistory",
     name: "Depot",
+    alwaysShow: true,
     meta: {
       title: "库存管理",
       icon: "nested",
@@ -208,7 +209,7 @@ export const constantRoutes = [
   {
     path: "/information",
     component: Layout,
-    redirect: "/information/production",
+    redirect: "/information/client",
     name: "Information",
     meta: {
       title: "信息管理",
@@ -234,8 +235,9 @@ export const constantRoutes = [
   {
     path: "/permission",
     component: Layout,
-    redirect: "/permission/role",
+    // redirect: "/permission/role",
     name: "Permission",
+    alwaysShow: true,
     meta: {
       title: "权限管理",
       icon: "nested",

@@ -30,7 +30,7 @@
       ]"
       :selectInfo="[
         {
-          value: '0',
+          value: '2',
           label: '进行中',
         },
         {
@@ -47,11 +47,14 @@
       :before-close="removeImg"
       size="60%"
       class="payInfo"
+      ref="add"
+      @mousedown.native="handleWrapperMousedown($event,'add')"
+      @mouseup.native="handleWrapperMouseup($event,'add')"
+      :wrapperClosable="false"
     >
       <Search
         v-if="show"
-
-      ref="search1"
+        ref="search1"
         :search="[
           { title: '发票号', type: 'input' },
           { title: '发票图片', type: 'file' },
@@ -74,16 +77,16 @@
       </div>
       <!-- // -->
       <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0"></div>
-      <div style="float: right; margin: 10px 10px 20px">
+      <div style="float: right; margin: 10px 0 20px">
         <div>
-          应收总额：<span style="font-weight: 700">{{ rece_total }}</span>
+          未开发票总额：<span style="font-weight: 700">{{ rece_total }}</span>
         </div>
         <div>
           发票总额：<span style="font-weight: 700">{{ invoice_total }}</span>
         </div>
       </div>
       <!--  -->
-      <div style="margin: 10px">
+      <div style="">
         <el-table
           class="infoD_t"
           v-loading="listLoading"
@@ -98,7 +101,7 @@
             align="center"
             label="序号"
             width="50"
-            class-name="li"
+            class-name="li first"
           >
             <template slot-scope="scope">
               {{ scope.$index + 1 }}
@@ -416,6 +419,10 @@
       @close="closeClear"
       size="60%"
       class="payInfo"
+      ref="his"
+      @mousedown.native="handleWrapperMousedown($event,'his')"
+      @mouseup.native="handleWrapperMouseup($event,'his')"
+      :wrapperClosable="false"
     >
       <Search
         :search="[
@@ -428,7 +435,7 @@
         ]"
         :selectInfo="[
           {
-            value: '0',
+            value: '2',
             label: '进行中',
           },
           {
@@ -456,7 +463,6 @@
       <!--  -->
       <div
         style="
-          margin: 10px;
           position: absolute;
           left: 0;
           right: 0;
@@ -479,7 +485,7 @@
             align="center"
             label="序号"
             width="50"
-            class-name="li"
+            class-name="li first"
           >
             <template slot-scope="scope">
               {{ scope.$index + 1 }}
@@ -685,9 +691,9 @@
                 >
                   <el-image
                     style="position: relative"
-                    :src="'http://192.168.1.122:8080' + scope.row.receipt_image"
+                    :src="url + scope.row.receipt_image"
                     :preview-src-list="[
-                      'http://192.168.1.122:8080' + scope.row.receipt_image,
+                      url + scope.row.receipt_image,
                     ]"
                   ></el-image>
                 </div>
@@ -732,7 +738,7 @@
                   flex-direction: column;
                 "
               >
-                {{ scope.row.amount }}
+                {{ scope.row.actual_receipt_amount }}
               </div>
             </template>
           </el-table-column>
@@ -753,7 +759,7 @@
               >
                 {{
                   new Number(scope.row.receipt_amount) -
-                  new Number(scope.row.amount)
+                  new Number(scope.row.actual_receipt_amount)
                 }}
               </div>
             </template>
@@ -767,8 +773,8 @@
             <template slot-scope="scope">
               <el-tag
                 effect="dark"
-                :type="scope.row.bill_status | statusFilter"
-                >{{ scope.row.bill_status == 0 ? "进行中" : "已完成" }}</el-tag
+                :type="scope.row.receipt_status | statusFilter"
+                >{{ scope.row.receipt_status == 0 ? "进行中" : "已完成" }}</el-tag
               >
             </template>
           </el-table-column>
@@ -788,8 +794,11 @@
                 type="primary"
                 size="small"
                 @click="openCollection(scope)"
+                v-if="payL"
                 >收款</el-button
               >
+              <el-button type="info" size="small" v-if="!payL"></el-button>
+
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
@@ -807,20 +816,25 @@
       class-name="button t pay"
       @close="closeCollection"
       :before-close="closeCollectBefore"
+      ref="coll"
+      @mousedown.native="handleWrapperMousedown($event,'coll')"
+      @mouseup.native="handleWrapperMouseup($event,'coll')"
+      :wrapperClosable="false"
     >
       <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0"></div>
       <div style="padding-left: 20px">操作</div>
       <Search
+      :value="value"
         :search="[
           { title: '付款金额', type: 'input' },
           { title: '凭证号', type: 'input' },
           { title: '回执单图片', type: 'file' },
         ]"
-        :button="[{ title: '确定', type: 'primary', if: true }]"
+        :button="[{ title: '确定', type: 'primary', if: payI }]"
       ></Search>
       <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0"></div>
       <div style="padding-left: 20px">记录</div>
-      <div style="margin: 10px">
+      <div style="margin-top:10px;">
         <el-table
           class="infoD_t"
           v-loading="listLoading"
@@ -835,7 +849,7 @@
             align="center"
             label="序号"
             width="50"
-            class-name="li"
+            class-name="li first"
           >
             <template slot-scope="scope">
               {{ scope.$index + 1 }}
@@ -868,18 +882,14 @@
                     left: 0;
                   "
                 >
-                  <!-- <el-image
-                    style="position: relative"
-                    :src="'http://192.168.1.122:8080' + scope.row.receipt_image"
-                    :preview-src-list="[
-                      'http://192.168.1.122:8080' + scope.row.receipt_image,
-                    ]"
-                  ></el-image> -->
                   <el-image
                     style="position: relative"
-                    :src="'http://tongyu.devapi.ltokay.cn' + scope.row.receipt_image"
+                    :src="
+                      url + scope.row.receipt_image
+                    "
                     :preview-src-list="[
-                      'http://tongyu.devapi.ltokay.cn' + scope.row.receipt_image,
+                      url +
+                        scope.row.receipt_image,
                     ]"
                   ></el-image>
                 </div>
@@ -931,18 +941,13 @@
                     left: 0;
                   "
                 >
-                  <!-- <el-image
-                    style="position: relative"
-                    :src="'http://192.168.1.122:8080' + scope.row.proof_image"
-                    :preview-src-list="[
-                      'http://192.168.1.122:8080' + scope.row.proof_image,
-                    ]"
-                  ></el-image> -->
                   <el-image
                     style="position: relative"
-                    :src="'http://tongyu.devapi.ltokay.cn' + scope.row.proof_image"
+                    :src="
+                      url + scope.row.proof_image
+                    "
                     :preview-src-list="[
-                      'http://tongyu.devapi.ltokay.cn' + scope.row.proof_image,
+                      url + scope.row.proof_image,
                     ]"
                   ></el-image>
                 </div>
@@ -1024,7 +1029,7 @@
           align="center"
           label="序号"
           width="50"
-          class-name="li hei"
+          class-name="li hei first"
         >
           <template slot-scope="scope">
             {{ scope.$index + 1 }}
@@ -1347,12 +1352,18 @@
             style="display: flex; flex-wrap: wrap"
             class="operation"
           >
-            <el-button type="primary" size="small" @click="openInfo(scope)">
+            <el-button type="primary" size="small" @click="openInfo(scope)"
+            v-if="openIno">
               开票
             </el-button>
-            <el-button type="primary" size="small" @click="openClear(scope)">
+            <el-button type="info" size="small" v-if="!openIno"></el-button>
+
+            <el-button type="primary" size="small" @click="openClear(scope)" v-if="infoI">
               发票收款
             </el-button>
+            <el-button type="info" size="small" v-if="!infoI"></el-button>
+
+
             <el-button type="info" size="small"></el-button>
             <el-button type="info" size="small"></el-button>
             <el-button type="info" size="small"></el-button>
@@ -1386,14 +1397,16 @@ import {
   invoiceHistory,
   Receipt,
   collectList,
-  invoiceDe
+  invoiceDe,
 } from "@/api/table";
 import Search from "@/components/Search/index.vue";
 import throttle from "lodash/throttle";
 import cloneDeep from "lodash/cloneDeep";
+import {url} from '@/utils/url';
 
 export default {
   mounted() {
+    console.log(this.url);
     this.$bus.$on("storage", this.invoic);
     this.$bus.$on("goSearch", this.search);
   },
@@ -1414,7 +1427,8 @@ export default {
   },
   data() {
     return {
-      show:true,
+      value:0,
+      show: true,
       list: [],
       invoicList: [],
       invoicHistoryList: [],
@@ -1440,6 +1454,9 @@ export default {
       isCollection: false,
       receiptID: null,
       orderID: null,
+      //
+      classmodel:null,
+
     };
   },
   created() {
@@ -1454,6 +1471,22 @@ export default {
       } else {
         return 0;
       }
+    },
+    url(){
+      return url;
+    },
+    auth_id(){
+      return localStorage.getItem('auth_id').split(',');
+    },
+    openIno(){
+      return this.auth_id.includes('29')
+    },
+    infoI(){
+      return this.auth_id.includes('30')
+    },payI(){
+      return this.auth_id.includes('31')
+    },payL(){
+      return this.auth_id.includes('32')
     },
   },
   methods: {
@@ -1478,19 +1511,19 @@ export default {
     },
     checkPrice(scope) {
       if (scope.row.not_amount) {
-        if (new Number(scope.row.not_amount) < this.perNum[scope.$index]) {
+        if (new Number(scope.row.not_amount) < this.perNum[scope.$index]||this.perNum[scope.$index]<0) {
           this.$message({
-            message: "输入的发票额过大",
+            message: "输入的发票额错误",
             type: "error",
           });
           this.$set(this.perNum, scope.$index, 0);
         }
       } else {
         if (
-          new Number(scope.row.product_rece_total) < this.perNum[scope.$index]
+          new Number(scope.row.product_rece_total) < this.perNum[scope.$index]||this.perNum[scope.$index]<0
         ) {
           this.$message({
-            message: "输入的发票额过大",
+            message: "输入的发票额错误",
             type: "error",
           });
           this.$set(this.perNum, scope.$index, 0);
@@ -1510,32 +1543,48 @@ export default {
     },
     openInfo(scope) {
       console.log(scope.row);
-      invoiceDe(scope.row.order_id).then((res)=>{
-        this.invoicList = res.data.res[0].order_infos;
-      })
+      let not_mony = [];
+      if (scope.row.invoice_amount > 0) {
+        invoiceDe(scope.row.order_id).then((res) => {
+          // this.invoicList = res.data.res[0].order_infos;
+          not_mony = res.data.res;
+          let row = cloneDeep(scope.row.order_infos);
+          for (const iterator of row) {
+            for (const iterator1 of not_mony) {
+              if (iterator.order_product_id == iterator1.order_product_id)
+                iterator.not_amount = iterator1.not_amount;
+            }
+          }
+          this.invoicList = row;
+          this.visibleInfo = true;
+          for (const iterator of row) {
+            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            this.rece_total += new Number(iterator.not_amount);
+          }
+        });
+      }else{
+        this.invoicList = scope.row.order_infos;
+        this.visibleInfo = true;
+        for (const iterator of scope.row.order_infos) {
+            this.rece_total += new Number(iterator.product_rece_total);
+          }
+      }
       this.show = true;
       this.customerInfo = scope.row;
-      // this.invoicList = scope.row.order_infos;
       this.orderId = scope.row.order_id;
-      this.visibleInfo = true;
-      for (const iterator of scope.row.order_infos) {
-        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        this.rece_total += new Number(iterator.product_rece_total);
-      }
     },
-    removeImg(){
+    removeImg() {
       // this.$refs.search1.remove([]);
       // this.$bus.$emit("edit", []);
-      this.show=false;
-      this.$nextTick(()=>{
+      this.show = false;
+      this.$nextTick(() => {
         // this.show=true;
-      })
-      this.visibleInfo =false;
+      });
+      this.visibleInfo = false;
     },
     closeInfo() {
       // this.$bus.$emit("edit", []);
-    
-
+      this.show=false;
       this.rece_total = 0;
       this.perNum.length = 0;
       this.visibleInfo = false;
@@ -1544,9 +1593,8 @@ export default {
     //开发票
     invoic(searchInfo) {
       //不是收款界面
-      console.log(this.isCollection);
+      // console.log(this.isCollection);
       if (!this.isCollection) {
-        console.log('@');
         let data = new FormData();
         data.append("receipt_number", searchInfo[0]);
         data.append("receipt_image", searchInfo[1]);
@@ -1567,17 +1615,58 @@ export default {
           arr.push(obj);
         }
         data.append("receipt_infos", JSON.stringify(arr));
-        // Invoicing(data).then((res) => {
-        //   // console.log(res);
-        //   this.closeInfo();
-        // });
+        if(!searchInfo[0]){
+          this.$message({
+            message:'请填写发票号',
+            type:'error'
+          })
+          return
+        }
+        if(!searchInfo[1]){
+          this.$message({
+            message:'请选择发票图片',
+            type:'error'
+          })
+          return
+        }
+        if(arr.length<=0){
+          this.$message({
+            message:'请填写发票额',
+            type:'error'
+          })
+          return
+        }
+        Invoicing(data).then((res) => {
+          // console.log(res);
+          this.closeInfo();
+        });
       } else {
         let data = new FormData();
         data.append("receipt_id", this.receiptID);
         data.append("proof_number", searchInfo[1]);
         data.append("amount", searchInfo[0]);
         data.append("proof_image", searchInfo[2]);
-
+        if(!searchInfo[0]){
+          this.$message({
+            message:'请填写付款金额',
+            type:'error'
+          })
+          return
+        }
+        if(!searchInfo[1]){
+          this.$message({
+            message:'请填写凭证号',
+            type:'error'
+          })
+          return
+        }
+        if(!searchInfo[2]){
+          this.$message({
+            message:'请选择回执单图片',
+            type:'error'
+          })
+          return
+        }
         Receipt(data).then((res) => {
           collectList(this.receiptID).then((res) => {
             this.collectList = res.data.res;
@@ -1587,6 +1676,8 @@ export default {
     },
     //
     openClear(scope) {
+      this.customerInfo = scope.row;
+
       this.isHistory = true;
       this.orderID = scope.row.order_id;
       invoiceHistory(scope.row.order_id).then((res) => {
@@ -1603,6 +1694,8 @@ export default {
     },
     //
     openCollection(scope) {
+      console.log(scope.row);
+      this.value=new Number(scope.row.receipt_amount)- new Number(scope.row.actual_receipt_amount);
       this.receiptID = scope.row.receipt_id;
       this.isCollection = true;
       collectList(scope.row.receipt_id).then((res) => {
@@ -1622,7 +1715,7 @@ export default {
       this.fetchData();
     },
     closeCollectBefore() {
-      this.$bus.$emit('edit',[]);
+      this.$bus.$emit("edit", []);
       this.visibleCollection = false;
     },
     fetchData(searchInfo) {
@@ -1640,6 +1733,21 @@ export default {
         this.listLoading = false;
         console.log(1, res.data.res.data);
       });
+    },
+    handleWrapperMousedown(e, product) {
+      // 如果为true，则表示点击发生在遮罩层
+      this.classmodel = !!e.target.classList.contains("el-drawer__container");
+    },
+    handleWrapperMouseup(e, product) {
+      if (
+        !!e.target.classList.contains("el-drawer__container") &&
+        this.classmodel
+      ) {
+        this.$refs[product].closeDrawer();
+      } else {
+        this.product = true;
+      }
+      this.classmodel = false;
     },
   },
 };
@@ -1670,13 +1778,11 @@ export default {
   }
 }
 
-
-
 .payInfo {
   .el-drawer {
     // overflow:auto;
     min-width: 1500px;
-    padding: 0 10px;
+    padding: 0 20px;
     overflow: auto;
     .el-drawer__body {
       position: relative;
@@ -1685,7 +1791,6 @@ export default {
 }
 
 .info {
-  margin: 10px;
   justify-content: flex-start;
   background-color: rgba(230, 230, 230, 0.4);
   border-radius: 10px;
@@ -1746,7 +1851,7 @@ export default {
 
 .collection {
   .el-drawer {
-    padding: 0 10px;
+    padding: 0 20px;
     min-width: 1400px;
     .el-drawer__body {
       // padding: 0 10px;
@@ -1759,11 +1864,10 @@ export default {
     height: 100%;
   }
 }
-.to{
+.to {
   margin-top: 10px;
 }
-  .hei {
+.hei {
   min-height: 127px !important;
 }
-
 </style>

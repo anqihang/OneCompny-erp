@@ -28,17 +28,69 @@ import { mapGetters } from "vuex";
 import Logo from "./Logo";
 import SidebarItem from "./SidebarItem";
 import variables from "@/styles/variables.scss";
+import { checkRouter } from "@/api/table";
+import cloneDeep from "lodash/cloneDeep";
 
 export default {
   components: { SidebarItem, Logo },
   mounted() {
     console.log("#", this.$router);
   },
-  // data(){
-  //   return {
-  //     showLogo:true
-  //   }
-  // },
+  created(){
+    let routes = this.$router.options.routes;
+      checkRouter().then((res) => {
+        console.log(this.$router.options.routes);
+        let newO = [];
+        for (const iterator of res.data.list) {
+          let obj = {};
+          let b = iterator.route.split("/");
+          obj.path = b[1];
+          if (b[2]) {
+            obj.children = [];
+            obj.children.push(b[2]);
+          } else if (iterator.children) {
+            let arr = [];
+            for (const iterator1 of iterator.children) {
+              let b = iterator1.route.split("/");
+              if (b[2]) arr.push(b[2]);
+            }
+            obj.children = arr;
+          }
+          newO.push(obj);
+        }
+        //
+        let newRoute = [];
+        for (const a of newO) {
+          for (const iterator of routes) {
+            if (iterator.path.includes(a.path)) {
+              let f = cloneDeep(iterator);
+              f.children = [];
+              newRoute.push(f);
+              //
+              if (a.children) {
+                for (const b of a.children) {
+                  for (const iterator1 of iterator.children) {
+                    if (iterator1.path.includes(b)) {
+                      f.children.push(iterator1);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        for (let index = 0; index < 3; index++) {
+          newRoute.unshift(routes[2 - index]);
+        }
+        newRoute.push(routes[routes.length-1])
+        this.router= newRoute;
+      });
+  },
+  data(){
+    return {
+      router:[]
+    }
+  },
   // mounted() {
   //   this.$bus.$on("changeLogo", this.changeLogo);
   // },
@@ -50,7 +102,57 @@ export default {
   computed: {
     ...mapGetters(["sidebar"]),
     routes() {
-      return this.$router.options.routes;
+      let routes = this.$router.options.routes;
+      // checkRouter().then((res) => {
+      //   console.log(this.$router.options.routes);
+      //   let newO = [];
+      //   for (const iterator of res.data.list) {
+      //     let obj = {};
+      //     let b = iterator.route.split("/");
+      //     obj.path = b[1];
+      //     if (b[2]) {
+      //       obj.children = [];
+      //       obj.children.push(b[2]);
+      //     } else if (iterator.children) {
+      //       let arr = [];
+      //       for (const iterator1 of iterator.children) {
+      //         let b = iterator1.route.split("/");
+      //         if (b[2]) arr.push(b[2]);
+      //       }
+      //       obj.children = arr;
+      //     }
+      //     newO.push(obj);
+      //   }
+      //   console.log(newO);
+      //   //
+      //   let newRoute = [];
+      //   for (const a of newO) {
+      //     for (const iterator of routes) {
+      //       if (iterator.path.includes(a.path)) {
+      //         let f = cloneDeep(iterator);
+      //         f.children = [];
+      //         newRoute.push(f);
+      //         //
+      //         if (a.children) {
+      //           for (const b of a.children) {
+      //             for (const iterator1 of iterator.children) {
+      //               if (iterator1.path.includes(b)) {
+      //                 f.children.push(iterator1);
+      //               }
+      //             }
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      //   for (let index = 0; index < 3; index++) {
+      //     newRoute.unshift(routes[2 - index]);
+      //   }
+      //   newRoute.push(routes[routes.length-1])
+      //   // return newRoute;
+      // });
+      return this.router
+      // return this.$router.options.routes;
     },
     activeMenu() {
       const route = this.$route;

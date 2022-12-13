@@ -11,9 +11,9 @@
         { title: '备注', type: 'input' },
       ]"
       :button="[
-        { title: '搜索', type: '',if:true },
-        { title: '重置', type: '',if:true },
-        { title: '添加', type: 'primary',if:true },
+        { title: '搜索', type: '', if: true },
+        { title: '重置', type: '', if: true },
+        { title: '添加', type: 'primary', if:addP},
       ]"
     ></Search>
     <!-- <el-pagination
@@ -30,13 +30,17 @@
     </el-pagination> -->
     <!-- 添加 -->
     <el-drawer
-    v-loading="addListLoading"
+      v-loading="addListLoading"
       class="addProductionDrawer"
       direction="rtl"
       size="60%"
       :title="isEdit ? '编辑' : '添加产品'"
       :visible.sync="visibleDialog"
       @close="closeAddDrawer"
+      ref="product"
+      @mousedown.native="handleWrapperMousedown($event,'product')"
+      @mouseup.native="handleWrapperMouseup($event,'product')"
+      :wrapperClosable="false"
     >
       <div>
         <Search
@@ -51,7 +55,7 @@
             { title: '描述', type: 'input' },
             { title: '备注', type: 'input' },
           ]"
-          :button="[{ title: '确定', type: 'primary',if:true }]"
+          :button="[{ title: '确定', type: 'primary', if: true }]"
         ></Search>
         <!-- <el-form
           :model="productionInfo"
@@ -80,7 +84,7 @@
           margin: 0 30px;
           background-color: rgba(128, 128, 128, 0.1);
           border-radius: 5px;
-          margin: 5px;
+          margin: 5px 0;
           padding: 10px 20px;
         "
       >
@@ -129,12 +133,13 @@
             size="small"
             type="success"
             @click="submitUpload"
+            v-if="importBom"
             >上传</el-button
           >
         </div>
         <div>
           <el-button size="small" @click="download">
-            <a href="http://192.168.1.121:8080/uploads/temple/产品BOM模板.xlsx"
+            <a :href="url+'/uploads/temple/产品BOM模板.xlsx'"
               >下载模板</a
             >
           </el-button>
@@ -158,7 +163,7 @@
             align="center"
             label="项次"
             width="50"
-            class-name="li"
+            class-name="li first"
           >
             <template slot-scope="scope">
               {{ scope.$index + 1 }}
@@ -360,6 +365,11 @@
     </el-drawer>
     <!-- 查看 -->
     <el-drawer
+      ref="show"
+      @mousedown.native="handleWrapperMousedown($event,'show')"
+      @mouseup.native="handleWrapperMouseup($event,'show')"
+      :wrapperClosable="false"
+
       class="addProductionDrawer"
       direction="rtl"
       size="35%"
@@ -391,11 +401,11 @@
           <div>产品名称</div>
           <div>{{ infoList.product_name }}</div>
         </div>
-        <div style="width: 30%">
+        <div style="width: 33%">
           <div>描述</div>
           <div>{{ infoList.desc }}</div>
         </div>
-        <div style="width: 35%">
+        <div style="width: 30%">
           <div>备注</div>
           <div>{{ infoList.remarks }}</div>
         </div>
@@ -414,10 +424,10 @@
       >
         <div>产品BOM信息</div>
         <div>
-          <el-button size="small" type="primary" @click="download">
+          <el-button size="small" type="primary" @click="download" :disabled="!exportP">
             <a
               :href="
-                'http://192.168.1.121:8080/admin/Product/export_bom?id=' +
+                url+'/admin/Product/export_bom?id=' +
                 editId
               "
             >
@@ -441,7 +451,7 @@
             align="center"
             label="序号"
             width="50"
-            class-name="li"
+            class-name="li first"
           >
             <template slot-scope="scope">
               {{ scope.$index + 1 }}
@@ -478,7 +488,7 @@
                 placement="top-start"
                 min-width="200%"
                 trigger="hover"
-                content="scope.row.address"
+                :content="scope.row.name"
               >
                 <span
                   class="threeLine"
@@ -505,7 +515,7 @@
                 placement="top-start"
                 min-width="200%"
                 trigger="hover"
-                content="scope.row.address"
+                :content="scope.row.specs"
               >
                 <span
                   class="threeLine"
@@ -540,7 +550,7 @@
                 placement="top-start"
                 min-width="200%"
                 trigger="hover"
-                content="scope.row.address"
+                :content="scope.row.position_code"
               >
                 <span
                   class="threeLine"
@@ -567,7 +577,7 @@
                 placement="top-start"
                 min-width="200%"
                 trigger="hover"
-                content="scope.row.address"
+                :content="scope.row.supplier"
               >
                 <span
                   class="threeLine"
@@ -614,7 +624,7 @@
                 placement="top-start"
                 min-width="200%"
                 trigger="hover"
-                content="scope.row.address"
+                :content="scope.row.remarks"
               >
                 <span
                   class="threeLine"
@@ -729,7 +739,7 @@
         :header-cell-style="{ left: 0, right: 0 }"
         @sort-change="sort"
       >
-        <el-table-column align="center" label="序号" width="50" class-name="li">
+        <el-table-column align="center" label="序号" width="50" class-name="li first">
           <template slot-scope="scope">
             {{ scope.$index + 1 }}
           </template>
@@ -912,14 +922,19 @@
         >
           <template slot-scope="scope" style="display: flex; flex-wrap: wrap">
             <el-button type="primary" size="small" @click="showInfo(scope.row)"
-              >产品信息</el-button
+              v-if="infoP">产品信息</el-button
             >
+            <el-button type="info" size="small" v-if="!infoP"></el-button>
+
             <el-button
               type="primary"
               size="small"
               @click="editProduction(scope.row)"
+              v-if="editP"
               >编辑</el-button
             >
+            <el-button type="info" size="small" v-if="!editP"></el-button>
+
             <el-button type="info" size="small"></el-button>
             <el-popconfirm
               title="确定删除吗？"
@@ -927,10 +942,12 @@
               icon-color="red"
               @onConfirm="deleteP(scope.row)"
             >
-              <el-button type="danger" size="small" slot="reference">
+              <el-button type="danger" size="small" slot="reference" v-if="deletePro">
                 删除
               </el-button>
             </el-popconfirm>
+            <el-button type="info" size="small" v-if="!deletePro"></el-button>
+
             <el-button type="info" size="small"></el-button>
             <el-button type="info" size="small"></el-button>
           </template>
@@ -974,6 +991,7 @@ import { Readable } from "stream";
 XLSX.stream.set_readable(Readable);
 import * as cpexcel from "xlsx/dist/cpexcel.full.mjs";
 XLSX.set_cptable(cpexcel);
+import {url} from '@/utils/url'
 
 export default {
   filters: {
@@ -985,6 +1003,31 @@ export default {
       };
       return statusMap[status];
     },
+  },
+  computed:{
+    url(){
+      return url;
+    },
+    auth_id(){
+      return localStorage.getItem('auth_id').split(',');
+    },
+    addP(){
+      // return true;
+      return this.auth_id.includes('13');
+    },
+    importBom(){
+      return this.auth_id.includes('14');
+    },
+    editP(){
+      // return true;
+      return this.auth_id.includes('15');
+    },exportP(){
+      return this.auth_id.includes('16');
+    },deletePro(){
+      return this.auth_id.includes('17');
+    },infoP(){
+      return this.auth_id.includes('18');
+    }
   },
   components: {
     Search,
@@ -1008,7 +1051,7 @@ export default {
       },
       listLoading: false,
       FlistLoading: false,
-      addListLoading:false,
+      addListLoading: false,
       //
       page_size: 10,
       page_current: 1,
@@ -1025,6 +1068,8 @@ export default {
       isEdit: false,
       isEditId: null,
       aaa: null,
+      //
+      classmodel:null,
       //
       productionInfo: {
         companyName: "",
@@ -1082,9 +1127,7 @@ export default {
   },
   methods: {
     download() {
-      console.log(this.editId);
-      // this.$router.push(`http://192.168.1.121:8080/admin/Product/export_bom?id=${this.editId}`);
-      // downLoad(this.editId).then((res) => {});
+      
     },
     beforeUpload(file) {},
     changeBOMList(file, fileList) {
@@ -1242,12 +1285,14 @@ export default {
     showInfo(row) {
       this.FlistLoading = true;
       this.editId = row.product_id;
-      getBOMList(row.product_id).then((res) => {
-        this.infoList = res.data.res;
-        this.visibleDialog_info = true;
-      }).finally(()=>{
-        this.FlistLoading = false;
-      });
+      getBOMList(row.product_id)
+        .then((res) => {
+          this.infoList = res.data.res;
+          this.visibleDialog_info = true;
+        })
+        .finally(() => {
+          this.FlistLoading = false;
+        });
     },
     closeInfo() {
       this.visibleDialog_info = false;
@@ -1270,15 +1315,17 @@ export default {
         row.desc,
         row.remarks,
       ];
-      getBOMList(row.product_id).then((res) => {
-        this.infoList = res.data;
-        this.bomList = res.data.res.product_bom;
-        this.length = this.bomList.length;
-        this.$bus.$emit("edit", this.propInfo);
-        // this.FlistLoading = false;
-      }).finally(()=>{
-        this.addListLoading =false;
-      });
+      getBOMList(row.product_id)
+        .then((res) => {
+          this.infoList = res.data;
+          this.bomList = res.data.res.product_bom;
+          this.length = this.bomList.length;
+          this.$bus.$emit("edit", this.propInfo);
+          // this.FlistLoading = false;
+        })
+        .finally(() => {
+          this.addListLoading = false;
+        });
       this.addOpenDrawer();
     },
     //初始化
@@ -1345,6 +1392,22 @@ export default {
         this.fetchData();
       });
     },
+    //
+    handleWrapperMousedown(e, product) {
+      // 如果为true，则表示点击发生在遮罩层
+      this.classmodel = !!e.target.classList.contains("el-drawer__container");
+    },
+    handleWrapperMouseup(e, product) {
+      if (
+        !!e.target.classList.contains("el-drawer__container") &&
+        this.classmodel
+      ) {
+        this.$refs[product].closeDrawer();
+      } else {
+        this.product = true;
+      }
+      this.classmodel = false;
+    },
   },
 };
 </script>
@@ -1360,10 +1423,11 @@ export default {
     height: 100%;
   }
 }
+
 .production {
   // position: none!important;
   .info {
-    margin: 5px!important;
+    margin: 5px !important;
     justify-content: flex-start;
     background-color: rgba(230, 230, 230, 0.4);
     border-radius: 10px;
@@ -1384,7 +1448,7 @@ export default {
   }
   .addProductionDrawer {
     .el-drawer__body {
-      padding: 15px;
+      padding: 20px;
     }
     .el-drawer {
       min-width: 1500px !important;

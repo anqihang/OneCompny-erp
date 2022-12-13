@@ -35,7 +35,7 @@
       ]"
       :selectInfo="[
         {
-          value: '0',
+          value: '2',
           label: '进行中',
         },
         {
@@ -51,8 +51,12 @@
       :visible.sync="visibleAdd"
       @close="closeAddDrawer"
       class="inbound"
+      ref="add"
+      @mousedown.native="handleWrapperMousedown($event, 'add')"
+      @mouseup.native="handleWrapperMouseup($event, 'add')"
+      :wrapperClosable="false"
     >
-    <Search
+      <Search
         :search="[
           { title: '入库人', type: 'input' },
           { title: '入库单号', type: 'input' },
@@ -76,7 +80,7 @@
         </div>
       </div>
 
-      <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0"></div>
+      <div style="background-color: #f5f7fa; height: 4px; margin: 17px 0 8px"></div>
 
       <div>
         <div
@@ -100,7 +104,7 @@
               width="50"
               label="序号"
               align="center"
-              class-name="li"
+              class-name="li first"
             >
               <template slot-scope="scope">
                 {{ scope.$index + 1 }}
@@ -239,6 +243,7 @@
               <template slot-scope="scope">
                 <el-input
                   placeholder="请输入"
+                  @change="checkInNum(scope)"
                   v-model="perNumber[scope.$index]"
                 ></el-input>
               </template>
@@ -260,10 +265,8 @@
               >
                 <el-button type="info" size="small"></el-button>
 
-                
-                  <el-button type="info" size="small" slot="reference">
-                  </el-button>
-                
+                <el-button type="info" size="small" slot="reference">
+                </el-button>
 
                 <el-button type="info" size="small"></el-button>
                 <el-button type="info" size="small"></el-button>
@@ -283,6 +286,10 @@
       @close="closeInfo"
       size="60%"
       class="infoD"
+      ref="inf"
+      @mousedown.native="handleWrapperMousedown($event, 'inf')"
+      @mouseup.native="handleWrapperMouseup($event, 'inf')"
+      :wrapperClosable="false"
     >
       <Search
         :search="[
@@ -294,7 +301,7 @@
           { title: '重置', type: '', if: true },
         ]"
       ></Search>
-      <div style="display: flex; flex-wrap: wrap" class="info">
+      <div style="display: flex; flex-wrap: wrap;margin-top:8px" class="info">
         <div style="width: 33%">
           <div>客户名称</div>
           <div>{{ addObj.company_name }}</div>
@@ -310,7 +317,6 @@
       </div>
       <div
         style="
-          margin: 10px;
           position: absolute;
           left: 0;
           right: 0;
@@ -333,7 +339,7 @@
             align="center"
             label="序号"
             width="50"
-            class-name="li"
+            class-name="li first"
           >
             <template slot-scope="scope">
               {{ scope.$index + 1 }}
@@ -647,18 +653,11 @@
                   margin-top: -2px;
                 "
               >
-                <!-- <el-image
-                  style="position: relative"
-                  :src="'http://192.168.1.122:8080' + item.godown_image"
-                  :preview-src-list="[
-                    'http://192.168.1.122:8080' + item.godown_image,
-                  ]"
-                ></el-image> -->
                 <el-image
                   style="position: relative"
-                  :src="'http://tongyu.devapi.ltokay.cn' + item.godown_image"
+                  :src="url + item.godown_image"
                   :preview-src-list="[
-                    'http://tongyu.devapi.ltokay.cn' + item.godown_image,
+                    url + item.godown_image,
                   ]"
                 ></el-image>
               </div>
@@ -671,6 +670,7 @@
             class-name="li"
           >
             <template slot-scope="scope">
+              
               <div
                 style="
                   width: 100%;
@@ -679,16 +679,28 @@
                   flex-direction: column;
                 "
               >
-                  <span
-                    style="
-                      display: flex;
-                      justify-content: start;
-                      text-align: start !important;
-                    "
-                  >
-                    {{ scope.row.remarks }}
-                  </span>
+              <div
+                v-for="(item, index) in scope.row.inblound_infos"
+                :key="index"
+                style="
+                  height: 135px;
+                  position: relative;
+                  text-align: start;
+                  border-top: 1px solid #ebeef5;
+                  margin-top: -2px;
+                "
+              >
+                <span
+                  style="
+                    display: flex;
+                    justify-content: start;
+                    text-align: start !important;
+                  "
+                >
+                  {{ item.remarks }}
+                </span>
               </div>
+            </div>
             </template>
           </el-table-column>
           <el-table-column
@@ -720,8 +732,10 @@
                   type="primary"
                   size="small"
                   @click="edit(scope, index, item)"
+                  v-if="editI"
                   >编辑</el-button
                 >
+                <el-button type="info" size="small" v-if="!editI"></el-button>
 
                 <el-button
                   type="primary"
@@ -770,7 +784,7 @@
           align="center"
           label="序号"
           width="50"
-          class-name="li "
+          class-name="li first"
         >
           <template slot-scope="scope">
             {{ scope.$index + 1 }}
@@ -978,50 +992,6 @@
             </div>
           </template>
         </el-table-column>
-        <!-- <el-table-column align="center" label="当前库存量" width="100" class-name="mor">
-          <template slot-scope="scope">
-            <div style="
-                width: 100%;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-              ">
-              <div v-for="(item, index) in scope.row.order_infos" :key="index" style="
-                  height: 127px;
-                  position: relative;
-                  text-align: start;
-                  border-top: 1px solid #ebeef5;
-                  margin-top: -2px;
-                ">
-                {{ item.stock_number }}
-              </div>
-            </div>
-          </template>
-        </el-table-column> -->
-        <!-- <el-table-column
-          align="center"
-          prop="created_at"
-          label="出库时间"
-          width="170"
-          class-name="mor"
-        >
-          <template slot-scope="scope">
-            <div
-              v-for="(item, index) in scope.row.order_infos"
-              :key="index"
-              style="
-                height: 127px;
-                position: relative;
-                text-align: start;
-                border-top: 1px solid #ebeef5;
-                margin-top: -2px;
-              "
-            >
-              <i class="el-icon-time" />
-              <span>{{ scope.row.display_time }}</span>
-            </div>
-          </template>
-        </el-table-column> -->
         <el-table-column
           label="状态"
           align="center"
@@ -1036,33 +1006,6 @@
             >
           </template>
         </el-table-column>
-        <!-- <el-table-column
-          label="备注"
-          align="center"
-          width="100"
-          class-name="li"
-        >
-          <template slot-scope="scope">
-            <el-popover
-              placement="top-start"
-              min-width="200%"
-              trigger="hover"
-              content="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaassssssssssssssssssssssssaaaaaaaaaaaaaaa"
-            >
-              <span
-                class="threeLine"
-                slot="reference"
-                style="
-                  display: flex;
-                  justify-content: start;
-                  text-align: start !important;
-                "
-              >
-                完成中啊啊
-              </span>
-            </el-popover>
-          </template>
-        </el-table-column> -->
         <el-table-column
           align="center"
           label="操作"
@@ -1081,8 +1024,11 @@
               type="primary"
               size="small"
               @click="openAddDrawer(scope.row)"
+              v-if="inS"
               >入库</el-button
             >
+            <el-button type="info" size="small" v-if="!inS"></el-button>
+
             <el-button type="primary" size="small" @click="openInfo(scope.row)"
               >入库记录</el-button
             >
@@ -1093,10 +1039,11 @@
               icon-color="red"
               @onConfirm="deleteEnter(scope.row)"
             >
-              <el-button type="danger" size="small" slot="reference">
+              <el-button type="danger" size="small" slot="reference" v-if="deleteI">
                 删除
               </el-button>
             </el-popconfirm>
+            <el-button type="info" size="small" v-if="!deleteI"></el-button>
 
             <el-button type="info" size="small"></el-button>
             <el-button type="info" size="small"></el-button>
@@ -1132,6 +1079,8 @@ import {
 } from "@/api/table";
 import Search from "@/components/Search/index.vue";
 import cloneDeep from "lodash/cloneDeep";
+import {url} from '@/utils/url';
+
 
 export default {
   components: {
@@ -1148,19 +1097,23 @@ export default {
   },
   mounted() {
     this.$bus.$on("goSearch", this.search);
+    this.$bus.$on("storage", this.enterStorage);
   },
   computed: {
-    // status(){
-    //   for (const iterator of this.list) {
-    //     iterator.status = 1;
-    //     for (const iterator1 of iterator.order_infos) {
-    //       if(iterator1.not_in_number > 0){
-    //         console.log(iterator1.not_in_number);
-    //         iterator.status = 0;
-    //       }
-    //     }
-    //   }
-    // }
+    url(){
+      return url;
+    },
+    auth_id(){
+      return localStorage.getItem('auth_id').split(',');
+    },
+    inS(){
+      return this.auth_id.includes('23');
+    },
+    deleteI(){
+      return this.auth_id.includes('24');
+    },editI(){
+      return this.auth_id.includes('25');
+    },
   },
   data() {
     return {
@@ -1198,11 +1151,10 @@ export default {
         status: "",
         order_number: "",
       },
+      //
+      classmodel: null,
+      order_id: null,
     };
-  },
-  mounted() {
-    this.$bus.$on("goSearch", this.search);
-    this.$bus.$on("storage", this.enterStorage);
   },
   beforeDestroy() {
     this.$bus.$off();
@@ -1212,6 +1164,18 @@ export default {
     this.FlistLoading = true;
   },
   methods: {
+    checkInNum(scope) {
+      if (
+        scope.not_in_number < this.perNum[scope.$index] ||
+        this.perNum[scope.$index]
+      ) {
+        this.$set(this.perNum, scope.$index, 0);
+        this.$message({
+          message: "入库数错误",
+          type: "error",
+        });
+      }
+    },
     search(searchInfo) {
       if (!this.isInfo) {
         let newSearch = cloneDeep(searchInfo);
@@ -1266,6 +1230,7 @@ export default {
     openAddDrawer(row) {
       this.visibleAdd = true;
       this.addObj = row;
+      this.order_id = row.order_id;
     },
     closeAddDrawer() {
       this.perNumber = [];
@@ -1301,11 +1266,48 @@ export default {
         }
         infos.push(obj);
       }
+      for (const index in infos) {
+          if(infos[index].number==0){
+            infos.splice(index,1);
+          }
+        }
       data.append("godown_name", searchInfo[0] || "");
       data.append("odd_number", searchInfo[1] || "");
       data.append("remarks", searchInfo[3] || "");
       data.append("inblound_image", searchInfo[2] || "");
       data.append("inblound_infos", JSON.stringify(infos) || "");
+      data.append("order_id", this.order_id || "");
+          if(!searchInfo[0]){
+          this.$message({
+            message:'请填写入库人',
+            type:'error'
+          })
+          return
+        }
+        if(!searchInfo[1]){
+          this.$message({
+            message:'请填写入图库单号',
+            type:'error'
+          })
+          return
+
+        }
+        if(!searchInfo[2]){
+          this.$message({
+            message:'请选择入库单图片',
+            type:'error'
+          })
+          return
+
+        }
+        if(infos.length<=0){
+          this.$message({
+            message:'请填写产品入库数',
+            type:'error'
+          })
+          return
+
+        }
       if (ok) {
         enterStorage(data).then((res) => {
           this.closeAddDrawer();
@@ -1323,8 +1325,32 @@ export default {
         status: row.status,
       };
       enterStorageHistory(row.order_id).then((res) => {
-        console.log('@',res);
+        console.log("@", res);
         this.infoList = res.data.res || { order_infos: [] };
+        // for (const index in this.infoList.order_infos) {
+        //   if(this.infoList.order_infos[index].customer_code==this.infoList.order_infos[index+1].customer_code);
+        //   this.infoList.order_infos.splice(index+1,1);
+        // }
+        // for (let index = 0; index < this.infoList.order_infos.length; index++) {
+        //   if(this.infoList.order_infos[index].customer_code==this.infoList.order_infos[index+1].customer_code)
+        //       this.infoList.order_infos.splice(index+1,1);
+
+        // }
+        let arr = this.infoList.order_infos;
+        this.infoList.order_infos = arr.filter((item, index, arr) => {
+          return arr.indexOf(item, 0) == index;
+        });
+        let obj = {};
+
+        let peon = this.infoList.order_infos.reduce((cur, next) => {
+          obj[next.customer_code]
+            ? ""
+            : (obj[next.customer_code] = true && cur.push(next));
+          return cur;
+        }, []);
+        this.infoList.order_infos = peon;
+        // console.log(peon);
+        // console.log(this.infoList.order_infos);
       });
       this.isInfo = true;
       this.visibleInfo = true;
@@ -1351,15 +1377,15 @@ export default {
           this.listLoading = false;
           this.FlistLoading = false;
           //
-          for (const iterator of this.list) {
-            iterator.status = 1;
-            for (const iterator1 of iterator.order_infos) {
-              if (iterator1.not_in_number > 0) {
-                console.log(iterator1.not_in_number);
-                iterator.status = 0;
-              }
-            }
-          }
+          // for (const iterator of this.list) {
+          //   iterator.status = 1;
+          //   for (const iterator1 of iterator.order_infos) {
+          //     if (iterator1.not_in_number > 0) {
+          //       console.log(iterator1.not_in_number);
+          //       iterator.status = 0;
+          //     }
+          //   }
+          // }
         }
       );
     },
@@ -1402,12 +1428,27 @@ export default {
       });
       this.listLoading = false;
     },
+    handleWrapperMousedown(e, product) {
+      // 如果为true，则表示点击发生在遮罩层
+      this.classmodel = !!e.target.classList.contains("el-drawer__container");
+    },
+    handleWrapperMouseup(e, product) {
+      if (
+        !!e.target.classList.contains("el-drawer__container") &&
+        this.classmodel
+      ) {
+        this.$refs[product].closeDrawer();
+      } else {
+        this.product = true;
+      }
+      this.classmodel = false;
+    },
   },
 };
 </script>
 <style lang="scss">
 .info {
-  // margin: 10px;
+  margin: 0px;
   justify-content: flex-start;
   background-color: rgba(230, 230, 230, 0.4);
   border-radius: 10px;
@@ -1465,7 +1506,7 @@ export default {
 }
 
 .info {
-  margin: 10px;
+  margin: 0;
   justify-content: flex-start;
   background-color: rgba(230, 230, 230, 0.4);
   border-radius: 10px;
@@ -1490,7 +1531,7 @@ export default {
 .infoD {
   .el-drawer {
     min-width: 1400px;
-    padding: 0 10px 0;
+    padding: 0 20px 0;
     .el-drawer__body {
       // position:relative;
     }
@@ -1514,7 +1555,6 @@ export default {
 .indeop {
   .t {
     position: relative;
-
     .cell {
       position: absolute !important;
       top: 0 !important;
@@ -1538,6 +1578,7 @@ export default {
 }
 
 .infoD {
+  padding: 0 20px;
   .el-drawer {
     // overflow:auto;
     .el-drawer__body {

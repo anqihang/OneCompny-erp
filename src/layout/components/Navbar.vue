@@ -5,22 +5,25 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <el-dropdown class="avatar-container" trigger="click">
+      <el-dropdown class="avatar-container" trigger="click" style="cursor:pointer">
         <div class="avatar-wrapper">
           <!-- <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar"> -->
-          <img :src="'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif'+'?imageView2/1/w/80/h/80'" class="user-avatar">
+          <!-- <img :src="'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif'+'?imageView2/1/w/80/h/80'" class="user-avatar"> -->
           <span style="height:100%;vertical-align: top;display: inline-block;margin-left:10px;cursor: pointer;">{{name}}</span>
           <!-- <i class="el-icon-caret-bottom" /> -->
+          <svg class="icon" aria-hidden="true" style="height:45px;font-size: 40px;">
+            <use xlink:href="#icon-caidan"></use>
+          </svg>
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
             <el-dropdown-item>
-              Home
+              首页
             </el-dropdown-item>
           </router-link>
             <el-dropdown-item @click.native="changePwd">修改密码</el-dropdown-item>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">退出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -58,24 +61,33 @@ export default {
     Hamburger
   },
   computed: {
-    name(){
-      return localStorage.getItem('name');
-    },
+    // name(){
+    //   return localStorage.getItem('name');
+    // },
     ...mapGetters([
       'sidebar',
       'avatar',
       // 'name'
     ])
   },
+  mounted(){
+    this.$bus.$on('changeName',this.changeName);
+    this.name = localStorage.getItem('name');
+    console.log(this.name);
+  },
   //+++++++++++++++++
   data(){return{
     visibleAdd:false,
     userInfo:{
       password:''
-    }
+    },
+    name:1,
   }},
   //
   methods: {
+    changeName(name){
+      this.name = name;
+    },
     //+++++++++++++++++++++++++
     changePwd(){
       this.visibleAdd =true;

@@ -2,13 +2,17 @@ import axios from "axios";
 import { MessageBox, Message } from "element-ui";
 import store from "@/store";
 import { getToken } from "@/utils/auth";
+import {url} from '@/utils/url'
 
 // create an axios instance
 const service = axios.create({
   //-----------------------------------------------------------------------------------------------
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // baseURL: "http://192.168.1.122:8080", // url = base url + request url
-  baseURL:"http://tongyu.devapi.ltokay.cn",
+  baseURL:"http://tongyu.api.ltokay.cn",
+  // baseURL:"http://ltql.api.ltokay.cn",
+  // baseURL:url,
+  
   // baseURL: 'http://127.0.0.1:4523/m1/1930977-0-default', // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000, // request timeout
@@ -26,8 +30,13 @@ service.interceptors.request.use(
       // please modify it according to the actual situation
       //------------
       // console.log(1,getToken());
-      // config.headers['X-Token'] = getToken()
+      // config.headers['X-Token'] ='bearer '+ getToken()
+      config.headers['Authorization'] ='bearer '+ getToken()
+
     }
+    // if(localStorage.getItem('ax-token')){
+    //   config.headers['Authorization'] ='bearer '+ getToken()
+    // }
     return config;
   },
   (error) => {
@@ -63,23 +72,32 @@ service.interceptors.response.use(
         duration: 5 * 1000,
       });
 
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
+      // // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
+      if (res.code === 50008 || res.code === 50012 || res.code === 50014 || res.code == 101) {
         // to re-login
-        MessageBox.confirm(
-          "You have been logged out, you can cancel to stay on this page, or log in again",
-          "Confirm logout",
-          {
-            confirmButtonText: "Re-Login",
-            cancelButtonText: "Cancel",
-            type: "warning",
-          }
-        ).then(() => {
-          store.dispatch("user/resetToken").then(() => {
-            location.reload();
-          });
+        store.dispatch("user/resetToken").then(() => {
+          location.reload();
         });
+        // MessageBox.confirm(
+        //   // "You have been logged out, you can cancel to stay on this page, or log in again",
+        //   // "Confirm logout",
+        //   "登录失效",
+        //   {
+        //     confirmButtonText: "Re-Login",
+        //     type: "warning",
+        //   }
+        // ).then(() => {
+          
+        // });
       }
+      // console.log(7);
+      // return res;
+      // this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+      // localStorage.removeItem('ax-token');
+      // localStorage.removeItem('name');
+      // localStorage.removeItem('id')
+      // this.$router.push(`/login`)
+
       return Promise.reject(new Error(res.msg || "Error"));
     } else {
       //---------------------

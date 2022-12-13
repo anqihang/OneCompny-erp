@@ -466,7 +466,7 @@ export function getCollectionList({params,size,current}){
 //开票信息
 export function invoiceDe(params){
   return request({
-    url:"/admin/payment/receipt_list",
+    url:"/admin/payment/get_not_receipt",
     method:'get',
     params:{
       order_id:params
@@ -519,7 +519,7 @@ export function getRoleList(){
   })
 }
 //添加角色
-export function addRole(id,data){
+export function addRole(data){
   return request({
     url:'/admin/system/role_add',
     method:'post',
@@ -531,7 +531,7 @@ export function addRole(id,data){
   })
 }
 //编辑
-export function editRole(data){
+export function editRole(id,data){
   return request({
     url:"/admin/system/role_edit",
     method:'post',
@@ -539,7 +539,7 @@ export function editRole(data){
       id:id,
       name:data.name,
       desc:data.desc,
-      auth_ids:data.checked
+      auth_ids:JSON.stringify(data.checked)
     }
   })
 }
@@ -611,7 +611,7 @@ export function changePwd(data){
   })
 }
 //==========================
-//权限
+//添加权限
 export function addPer(data){
   return request({
     url:"/admin/system/auth_add",
@@ -621,7 +621,8 @@ export function addPer(data){
       pid:data.id,
       uri:data.func,
       route:data.path,
-      listorder:data.weight
+      listorder:data.weight,
+      is_menu:data.ismenu
     }
   })
 }
@@ -633,7 +634,7 @@ export function getPerList(){
   })
 }
 //编辑权限
-export function perEdit(id,data){
+export function perEdit(id,data,ismenu){
   return request({
     url:"/admin/system/auth_edit",
     method:"post",
@@ -643,7 +644,49 @@ export function perEdit(id,data){
       pid:data.id,
       route:data.path,
       uri:data.func,
-      listorder:data.weight
+      listorder:data.weight,
+      is_menu:ismenu
     }
+  })
+}
+//菜单列表
+export function getMenuList(id){
+  return request({
+    url:'/admin/system/getAuthList',
+    method:'get',
+    params:{
+      flag:id
+    }
+  })
+}
+//-------------------------------------
+//看板
+export function sharePie(){
+  return request({
+    url:'/admin/index/get_customer_percentage',
+    method:'get'
+  })
+}
+//2
+export function shareBar(){
+  return request({
+    url:'/admin/index/get_customer_order_amount',
+    method:'get'
+  })
+}
+export function deletePer(params){
+  return request({
+    url:'/admin/system/auth_delete',
+    method:'get',
+    params:{
+      id:params
+    }
+  })
+}
+//路由
+export function checkRouter(){
+  return request({
+    url:'/admin/index/get_menu_list',
+    method:'get'
   })
 }

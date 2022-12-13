@@ -48,9 +48,10 @@ const actions = {
         commit('SET_NAME',data.name)
         localStorage.setItem('name',data.name);
         commit('SET_ID',data.id)
-        localStorage.setItem('id',data.id)
+        localStorage.setItem('id',data.admin_id)
         //--------------------------------
         // setToken(data.X-token);
+        localStorage.setItem('auth_id',data.auth_ids);
         resolve()
       }).catch(error => {
         reject(error)
@@ -83,12 +84,12 @@ const actions = {
   // user logout
   logout({ commit, state }) {
     return new Promise((resolve, reject) => {
-      localStorage.removeItem('ax-token');
-      localStorage.removeItem('name');
-      localStorage.removeItem('id');
+      // localStorage.removeItem('ax-token');
       logout(state.token).then(() => {
+        console.log(8);
         removeToken() // must remove  token  first
         localStorage.removeItem('id');
+        localStorage.removeItem('name');
         resetRouter()
         commit('RESET_STATE')
         resolve()

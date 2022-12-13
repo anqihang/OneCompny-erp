@@ -13,11 +13,11 @@
       :button="[
         { title: '搜索', type: '', if: true },
         { title: '重置', type: '', if: true },
-        { title: '添加', type: 'primary', if: true },
+        { title: '添加', type: 'primary', if: addO },
       ]"
       :selectInfo="[
         {
-          value: '0',
+          value: '2',
           label: '进行中',
         },
         {
@@ -37,6 +37,11 @@
       style="min-width: 1400px"
       @close="closeAddDrawer"
       @opened="openEdit"
+      @mousedown.native="handleWrapperMousedown($event,'add')"
+      @mouseup.native="handleWrapperMouseup($event,'add')"
+      :wrapperClosable="false"
+      
+      
     >
       <Search
         ref="search"
@@ -53,7 +58,7 @@
           { title: '选择产品', type: 'primary', if: !isEdit },
         ]"
       ></Search>
-      <div style="background-color: #f5f7fa; height: 3px; margin: 10px"></div>
+      <div style="background-color: #f5f7fa; height: 3px; margin: 2px"></div>
       <div>
         <div
           style="
@@ -79,10 +84,10 @@
               width="50"
               label="序号"
               align="center"
-              class-name="li"
+              class-name="li first"
             >
               <template slot-scope="scope">
-                {{ scope.$index }}
+                {{ scope.$index+1 }}
               </template>
             </el-table-column>
             <el-table-column
@@ -189,6 +194,7 @@
                 <el-input
                   style="width: 100%"
                   placeholder="请输入"
+                  @change="checkValue(scope)"
                   v-model="perValue[scope.$index]"
                 ></el-input>
               </template>
@@ -211,6 +217,7 @@
               <template slot-scope="scope">
                 <el-input
                   placeholder="请输入"
+                  @change="checkNumber(scope)"
                   v-model="perNum[scope.$index]"
                 ></el-input>
               </template>
@@ -270,6 +277,12 @@
       size="60%"
       style="min-width: 1300px"
       direction="rtl"
+      
+      ref="product"
+      @mousedown.native="handleWrapperMousedown($event,'product')"
+      @mouseup.native="handleWrapperMouseup($event,'product')"
+      :wrapperClosable="false"
+
     >
       <el-button
         @click="closeSelectDrawer"
@@ -288,9 +301,9 @@
       >
         <el-table-column type="selection" width="40" align="center">
         </el-table-column>
-        <el-table-column width="50" label="序号" align="center" class-name="li">
+        <el-table-column width="50" label="序号" align="center" class-name="li first">
           <template slot-scope="scope">
-            {{ scope.$index }}
+            {{ scope.$index+1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -395,6 +408,11 @@
       size="60%"
       direction="rtl"
       @close="closeDetails"
+      ref="inf"
+      @mousedown.native="handleWrapperMousedown($event,'inf')"
+      @mouseup.native="handleWrapperMouseup($event,'inf')"
+      :wrapperClosable="false"
+
     >
       <div style="display: flex; flex-wrap: wrap" class="info">
         <div style="width: 25%">
@@ -430,7 +448,7 @@
           padding: 10px 20px;
         "
       ></div> -->
-      <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0"></div>
+      <div style="background-color: #f5f7fa; height: 4px; margin: 10px 10px"></div>
 
       <div style="margin: 10px">
         <el-table
@@ -447,7 +465,7 @@
             align="center"
             label="序号"
             width="50"
-            class-name="li"
+            class-name="li first"
           >
             <template slot-scope="scope">
               {{ scope.$index + 1 }}
@@ -621,7 +639,7 @@
           top: '0!important',
         }"
       >
-        <el-table-column align="center" label="序号" width="50" class-name="li">
+        <el-table-column align="center" label="序号" width="50" class-name="li first">
           <template slot-scope="scope">
             {{ scope.$index+1 }}
             <!-- 100 -->
@@ -876,9 +894,9 @@
           <template slot-scope="scope">
             <el-image
               style="position: relative"
-              :src="'http://tongyu.devapi.ltokay.cn' + scope.row.order_image"
+              :src="'http://tongyu.api.ltokay.cn' + scope.row.order_image"
               :preview-src-list="[
-                'http://tongyu.devapi.ltokay.cn' + scope.row.order_image,
+                'http://tongyu.api.ltokay.cn' + scope.row.order_image,
               ]"
             ></el-image>
           </template>
@@ -931,13 +949,17 @@
         >
           <template slot-scope="scope" style="display: flex; flex-wrap: wrap">
             <el-button type="primary" size="small" @click="details(scope.row)"
-              >订单信息</el-button
+             v-if="infoO" >订单信息</el-button
             >
+            <el-button type="info" size="small" v-if="!infoO"></el-button>
+
             <el-button type="primary" size="small" @click="edit(scope.row)"
-              >
+             v-if="editO" >
               编辑
               </el-button
             >
+            <el-button type="info" size="small" v-if="!editO"></el-button>
+
             <el-button type="info" size="small"></el-button>
             <el-popconfirm
               title="确定删除吗？"
@@ -945,10 +967,12 @@
               icon-color="red"
               @onConfirm="deleteOrder(scope.row)"
             >
-              <el-button type="danger" size="small" slot="reference">
+              <el-button type="danger" size="small" slot="reference" v-if="deleteO">
                 删除
               </el-button>
             </el-popconfirm>
+            <el-button type="info" size="small" v-if="!deleteO"></el-button>
+
             <el-button type="info" size="small"></el-button>
             <el-button type="info" size="small"></el-button>
           </template>
@@ -965,7 +989,7 @@
         @size-change="sizeChange"
         :current-page="page_current"
         :page-size="page_size"
-        :page-sizes="[10, 50, 100]"
+        :page-sizes="[ 50, 100]"
       >
       </el-pagination>
     </div>
@@ -1012,7 +1036,6 @@ export default {
   data() {
     return {
       imglist: [
-        "http://192.168.1.121:8080/uploads/images/20221126/20221126143059778.jpg",
       ],
       //展示的list
       list: [],
@@ -1027,7 +1050,7 @@ export default {
       //
       order: "desc",
       page_current: 1,
-      page_size: 10,
+      page_size: 50,
       page_total: 1000,
       //
       visibleAdd: false,
@@ -1046,6 +1069,8 @@ export default {
       deleteList: [],
       addList: [],
       // totalPrice: 0,
+      classmodel:null,
+
     };
   },
   computed: {
@@ -1061,10 +1086,20 @@ export default {
           return this.toPrice;
         }
       },
-      // setter(v){
-      //   return
-      // }
     },
+    auth_id(){
+      return localStorage.getItem('auth_id').split(',');
+    },
+    addO(){
+      return this.auth_id.includes('19')
+    },
+    editO(){
+      return this.auth_id.includes('20')
+    },infoO(){
+      return this.auth_id.includes('21')
+    },deleteO(){
+      return this.auth_id.includes('22')
+    }
   },
   watch: {
    
@@ -1083,11 +1118,22 @@ export default {
     this.$bus.$off();
   },
   methods: {
+    checkValue(scope){
+      if(this.perValue[scope.$index]<0){
+        this.$set(this.perValue,scope.$index,0);
+      }
+    },
+    checkNumber(scope){
+      if(this.perNum[scope.$index]<0){
+        this.$set(this.perNum,scope.$index,0);
+      }
+    },
     search(searchInfo) {
       this.fetchData(searchInfo);
     },
     //添加的确定按钮
     sendOrder(a) {
+      console.log(a);
       if (!this.isEdit) {
         let products = [];
         for (const index in this.addProductsList) {
@@ -1104,6 +1150,35 @@ export default {
         data.append("work_order_number", a.info[4] || "");
         data.append("product_orders", JSON.stringify(products));
         data.append("order_image", a.info[2] || "");
+        console.log(a);
+        if(!a.id){
+          this.$message({
+            message:'请选择客户',
+            type:'error'
+          })
+          return;
+        }
+        if(!a.info[1]){
+          this.$message({
+            message:'请填写订单号',
+            type:'error'
+          })
+          return;
+
+        }if(products.length<=0){
+          this.$message({
+            message:'请选择产品',
+            type:'error'
+          })
+          return;
+
+        }if(!a.info[2]){
+          this.$message({
+            message:'请选择订单图片',
+            type:'error'
+          })
+          return;
+        }
         this.FlistLoading = true;
         addOrder(data).then((res) => {
           this.closeAddDrawer();
@@ -1297,8 +1372,32 @@ export default {
         this.list = res.data.res.data;
         this.listLoading = false;
         this.FlistLoading = false;
+        // for (const iterator of this.list) {
+        //     iterator.status = 1;
+        //     for (const iterator1 of iterator.order_infos) {
+        //       if (iterator1.not_out_number > 0) {
+        //         // console.log(iterator1.not_in_number);
+        //         iterator.status = 0;
+        //       }
+        //     }
+        //   }
       });
       this.FlistLoading = false;
+    },
+    handleWrapperMousedown(e, product) {
+      // 如果为true，则表示点击发生在遮罩层
+      this.classmodel = !!e.target.classList.contains("el-drawer__container");
+    },
+    handleWrapperMouseup(e, product) {
+      if (
+        !!e.target.classList.contains("el-drawer__container") &&
+        this.classmodel
+      ) {
+        this.$refs[product].closeDrawer();
+      } else {
+        this.product = true;
+      }
+      this.classmodel = false;
     },
   },
 };
@@ -1432,7 +1531,7 @@ export default {
       overflow: auto !important;
       height: 100%;
       .el-drawer__body {
-        margin: 10px;
+        margin: 20px;
       }
     }
   }
@@ -1462,7 +1561,7 @@ export default {
     min-width: 1400px;
   }
   .el-drawer__body {
-    padding: 0 20px;
+    padding: 0 10px;
   }
 }
 .imagePDF{

@@ -11,7 +11,14 @@ export default {
 </script>
 <style lang="scss">
 .info{
-  margin:10px!important;
+  // margin:10px!important;
+}
+.first{
+  // display:flex;
+  // justify-content:center;
+  .cell{
+    width:100%;
+  }
 }
 .threeLine {
   overflow: hidden;
@@ -154,3 +161,4 @@ export default {
   margin-bottom: 0;
 }
 </style>
+

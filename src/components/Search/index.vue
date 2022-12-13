@@ -91,6 +91,7 @@
               class="input-el"
               v-model="searchInfo[index]"
               :readonly="item.disabled"
+              @change="checkValue(item,index)"
             >
               <template slot="prepend">{{ item.title }}</template>
             </el-input>
@@ -205,14 +206,31 @@ export default {
         return [];
       },
     },
+    value:{
+      type:Number,
+    }
   },
   mounted() {
     this.$bus.$on("edit", this.copy);
   },
   beforeDestroy() {
-    this.$bus.$off();
+    this.$bus.$off('edit');
   },
   methods: {
+    checkValue(item,index){
+      console.log(this.value);
+      if(item.title=='付款金额'){
+      if(this.searchInfo[index]>this.value||this.searchInfo[index]<0){
+        // this.searchInfo[index] =0;
+        this.$set(this.searchInfo,index,0)
+        this.$message({
+          message:'金额错误',
+          type:'error'
+        })
+      }
+      }
+      // this.searchInfo[index]
+    },
     showName(index) {
       let fi = document.querySelector(".file");
       // console.log(fi.select);
@@ -405,8 +423,8 @@ export default {
                 }
               });
             } else {
-              console.log("0-0000");
-              console.log(this.$bus);
+              // console.log("0-0000");
+              // console.log(this.$bus);
               this.$bus.$emit("storage", this.searchInfo);
             }
           }
@@ -510,6 +528,7 @@ export default {
   align-items: flex-start;
   padding: 5px 0;
   &__left {
+    margin-left:-5px;
     display: flex;
     // flex-direction: column;
     // align-items: flex-end;
@@ -569,6 +588,13 @@ export default {
         .input-el {
           // display: flex;
           // align-items: center;
+          // .el-input__suffix{
+          //   display: flex;
+          //   align-items:center;
+          //   .el-input__suffix-inner{
+          //     height: 100%;
+          //   }
+          // }
           & > div {
             font-size: 14px;
             line-height: 28px;
@@ -579,8 +605,16 @@ export default {
             height: 30px;
             width: none !important;
           }
+
           .el-input__icon {
             line-height: 30px;
+          }
+        }
+        .el-input__suffix{
+          display: flex;
+          align-items: center;
+          &-inner{
+            height: 100%!important;
           }
         }
       }
@@ -588,7 +622,7 @@ export default {
   }
   &__right {
     // width: 264px;
-
+margin-right:-5px;
     .button {
       box-sizing: border-box;
       max-width: 264px;

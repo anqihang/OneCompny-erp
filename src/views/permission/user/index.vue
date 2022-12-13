@@ -5,7 +5,7 @@
       :button="[{ title: '添加', type: 'primary', if: true }]"
     ></Search> -->
     <div style="margin: 10px; display: flex; justify-content: flex-end">
-      <el-button type="primary" @click="openAdd">添加</el-button>
+      <el-button type="primary" @click="openAdd" v-if="addU">添加</el-button>
     </div>
     <!--  -->
     <el-drawer
@@ -62,16 +62,10 @@
       </el-table-column>
       <el-table-column label="账号" min-width="200" align="center">
         <template slot-scope="scope">
-          <el-popover
-            placement="top-start"
-            width="200%"
-            trigger="hover"
-            :content="scope.row.title"
-          >
+         
             <span class="threeLine" slot="reference">
               {{ scope.row.account }}
             </span>
-          </el-popover>
         </template>
       </el-table-column>
       <el-table-column label="用户名" min-width="200" align="center">
@@ -104,16 +98,26 @@
             type="primary"
             @click="openEdit(scope.row)"
             style="margin-right: 10px"
+            v-if="editU"
             >编辑</el-button
           >
+          <el-button type="info" 
+          style="height:40px;width:70px;vertical-align: top;margin-right:10px;"
+          
+          v-if="!editU"
+          ></el-button>
           <el-popconfirm
             title="确定删除吗？"
             icon="el-icon-info"
             icon-color="red"
             @onConfirm="deleteUser(scope.row)"
           >
-            <el-button type="danger" slot="reference"> 删除 </el-button>
+            <el-button type="danger" slot="reference" v-if='deleteU'> 删除 </el-button>
           </el-popconfirm>
+          <el-button type="info" 
+          style="height:40px;width:70px;vertical-align: top;"
+          v-if="!deleteU"
+          ></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -133,6 +137,20 @@ import Search from "@/components/Search/index.vue";
 export default {
   components: {
     Search,
+  },
+  computed:{
+    auth_id(){
+      return localStorage.getItem('auth_id').split(',');
+    },
+    addU(){
+      return this.auth_id.includes('40')
+    },
+    editU(){
+      return this.auth_id.includes('41')
+    },
+    deleteU(){
+      return this.auth_id.includes('43')
+    },
   },
   data() {
     return {
@@ -191,10 +209,12 @@ export default {
       if (!this.isEdit) {
         this.$refs["form"].validate((valid) => {
           if (valid) {
+            console.log(this.userInfo);
             addUser(this.userInfo)
-              .then((res) => {})
-              .finally(() => {
+              .then((res) => {
                 this.closeAdd();
+              })
+              .finally(() => {
               });
           }
         });
@@ -205,7 +225,11 @@ export default {
           }
         }
         editUser(this.id, this.userInfo)
-          .then((res) => {})
+          .then((res) => {
+            console.log(res);
+            localStorage.setItem('name',res.data.name)
+            this.$bus.$emit('changeName',res.data.name)
+          })
           .finally(() => {
             this.closeAdd();
           });

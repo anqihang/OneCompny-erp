@@ -75,12 +75,12 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '123456'
+        username: '',
+        password: ''
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        // username: [{ required: true, trigger: 'blur', validator: validateUsername }],
+        // password: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       loading: false,
       passwordType: 'password',
@@ -107,20 +107,22 @@ export default {
       })
     },
     handleLogin() {
-      this.$refs.loginForm.validate(valid => {
-        if (valid) {
+      // this.$refs.loginForm.validate(valid => {
+        // if (valid) {
           this.loading = true
+          console.log(1);
           this.$store.dispatch('user/login', this.loginForm).then(() => {
+            console.log(2);
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
           }).catch(() => {
             this.loading = false
           })
-        } else {
-          console.log('error submit!!')
-          return false
-        }
-      })
+        // } else {
+        //   console.log('error submit!!')
+        //   return false
+        // }
+      // })
     }
   }
 }

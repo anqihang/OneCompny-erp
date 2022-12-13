@@ -8,19 +8,22 @@
       </div>
       <app-main />
     </div>
+    <!-- <Print></Print> -->
   </div>
 </template>
 
 <script>
 import { Navbar, Sidebar, AppMain } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
+import Print from '@/views/print/print.vue'
 
 export default {
   name: 'Layout',
   components: {
     Navbar,
     Sidebar,
-    AppMain
+    AppMain,
+    Print
   },
   mixins: [ResizeMixin],
   computed: {
