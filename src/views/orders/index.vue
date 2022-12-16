@@ -303,7 +303,7 @@
         </el-table-column>
         <el-table-column width="50" label="序号" align="center" class-name="li first">
           <template slot-scope="scope">
-            {{ scope.$index+1 }}
+            {{ scope.$index + 1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -641,7 +641,7 @@
       >
         <el-table-column align="center" label="序号" width="50" class-name="li first">
           <template slot-scope="scope">
-            {{ scope.$index+1 }}
+            {{ (page_current-1)*100+scope.$index + 1 }}
             <!-- 100 -->
           </template>
         </el-table-column>
@@ -894,9 +894,10 @@
           <template slot-scope="scope">
             <el-image
               style="position: relative"
-              :src="'http://tongyu.api.ltokay.cn' + scope.row.order_image"
+              :src="url + scope.row.order_image"
+              :fit="'contain'"
               :preview-src-list="[
-                'http://tongyu.api.ltokay.cn' + scope.row.order_image,
+                url + scope.row.order_image,
               ]"
             ></el-image>
           </template>
@@ -1009,6 +1010,7 @@ import {
 import Search from "@/components/Search/index.vue";
 import throttle from "lodash/throttle";
 import cloneDeep from "lodash/cloneDeep";
+import {url} from '@/utils/url';
 
 export default {
   filters: {
@@ -1074,6 +1076,9 @@ export default {
     };
   },
   computed: {
+    url(){
+      return url;
+    },
     totalPrice: {
       get() {
         if (!this.isEdit) {

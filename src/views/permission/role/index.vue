@@ -141,10 +141,15 @@
               v-if="editR"
               >编辑</el-button
             >
-            <el-button type="info" 
-            style="height:40px;width:70px;vertical-align: top;margin-right:10px"
-            
-            v-if="!editR"
+            <el-button
+              type="info"
+              style="
+                height: 40px;
+                width: 70px;
+                vertical-align: top;
+                margin-right: 10px;
+              "
+              v-if="!editR"
             ></el-button>
             <el-popconfirm
               title="确定删除吗？"
@@ -152,9 +157,15 @@
               icon-color="red"
               @onConfirm="deleteRole(scope.row)"
             >
-              <el-button type="danger" slot="reference" v-if="deleteR"> 删除 </el-button>
+              <el-button type="danger" slot="reference" v-if="deleteR">
+                删除
+              </el-button>
             </el-popconfirm>
-            <el-button v-if="!deleteR" type="info"     style="height:40px;width:70px;vertical-align: top;"></el-button>
+            <el-button
+              v-if="!deleteR"
+              type="info"
+              style="height: 40px; width: 70px; vertical-align: top"
+            ></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -178,17 +189,18 @@ export default {
   components: {
     Search,
   },
-  computed:{
-    auth_id(){
-      return localStorage.getItem('auth_id').split(',');
+  computed: {
+    auth_id() {
+      return localStorage.getItem("auth_id").split(",");
     },
-    addR(){
-      return this.auth_id.includes('44')
+    addR() {
+      return this.auth_id.includes("44");
     },
-    editR(){
-      return this.auth_id.includes('45')
-    },deleteR(){
-      return this.auth_id.includes('46')
+    editR() {
+      return this.auth_id.includes("45");
+    },
+    deleteR() {
+      return this.auth_id.includes("46");
     },
   },
   filters: {
@@ -245,10 +257,9 @@ export default {
       this.$bus.$emit("edit", []);
     },
     addRole(searchInfo) {
+      this.roleInfo.name = searchInfo[0];
+      this.roleInfo.desc = searchInfo[1];
       if (!this.isEdit) {
-        this.roleInfo.name = searchInfo[0];
-        this.roleInfo.desc = searchInfo[1];
-        console.log(this.roleInfo.checked);
         addRole(this.roleInfo).then((res) => {
           this.closeAdd();
           this.fetchData();

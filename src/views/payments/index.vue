@@ -364,7 +364,8 @@
                     text-align: start !important;
                   "
                 >
-                  {{ scope.row.not_amount || scope.row.product_rece_total }}
+                <!-- {{scope.row.not_amount||sm-}} -->
+                  {{ typeof(scope.row.not_amount) == 'undefined'? scope.row.price*scope.row.out_total:scope.row.not_amount }}
                 </span>
               </div>
             </template>
@@ -383,11 +384,53 @@
                   display: flex;
                   flex-direction: column;
                 "
+              >{{perNum[scope.$index]}}
+                <!-- <el-input
+                  placeholder="请输入"
+                  v-model="perNum[scope.$index]"
+                ></el-input> -->
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="未开票数"
+            align="center"
+            width="100"
+            class-name="li"
+          >
+            <template slot-scope="scope">
+              <div
+                style="
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+              {{typeof(scope.row.not_amount) == 'undefined'? scope.row.price*scope.row.out_total/scope.row.price:scope.row.not_amount/scope.row.price}}
+               <!-- {{(scope.row.not_amount||scope.row.price*scope.row.out_total)/scope.row.price}} -->
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="开票数"
+            align="center"
+            width="100"
+            class-name="li inputLi"
+          >
+            <template slot-scope="scope">
+              <div
+                style="
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  flex-direction: column;
+                "
               >
                 <el-input
                   placeholder="请输入"
-                  @change="checkPrice(scope)"
-                  v-model="perNum[scope.$index]"
+                  @input="checkNum(scope)"
+                  v-model="perNumber[scope.$index]"
                 ></el-input>
               </div>
             </template>
@@ -637,7 +680,7 @@
                   style="width: 100%; border-bottom: 1px solid #ebeef5"
                 >
                   <span>
-                    {{ item.product_rece_total }}
+                    {{ item.price*item.out_total }}
                   </span>
                 </div>
               </div>
@@ -692,6 +735,7 @@
                   <el-image
                     style="position: relative"
                     :src="url + scope.row.receipt_image"
+                    :fit="'contain'"
                     :preview-src-list="[
                       url + scope.row.receipt_image,
                     ]"
@@ -884,6 +928,7 @@
                 >
                   <el-image
                     style="position: relative"
+                    :fit="'contain'"
                     :src="
                       url + scope.row.receipt_image
                     "
@@ -943,6 +988,7 @@
                 >
                   <el-image
                     style="position: relative"
+                    :fit="'contain'"
                     :src="
                       url + scope.row.proof_image
                     "
@@ -1032,7 +1078,7 @@
           class-name="li hei first"
         >
           <template slot-scope="scope">
-            {{ scope.$index + 1 }}
+            {{ (page_current-1)*100+scope.$index + 1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -1270,7 +1316,7 @@
                 :key="index"
                 style="width: 100%; border-bottom: 1px solid #ebeef5"
               >
-                <span>{{ item.product_rece_total }}</span>
+              <span>{{item.out_total * item.price}}</span>
               </div>
             </div>
           </template>
@@ -1447,7 +1493,8 @@ export default {
       //
       imageList: [[]],
       orderID: null,
-      perNum: [],
+      perNum: [],//发票额
+      perNumber:[],//发票数
       rece_total: 0,
       //
       isHistory: false,
@@ -1456,7 +1503,8 @@ export default {
       orderID: null,
       //
       classmodel:null,
-
+      //应收
+sm:0,
     };
   },
   created() {
@@ -1488,8 +1536,34 @@ export default {
     },payL(){
       return this.auth_id.includes('32')
     },
+    not_am(){
+      
+      return scope.row.price*scope.row.out_total
+    }
   },
   methods: {
+    mathValue(scope){
+    //  this.perNum = this.perNumber.map((n)=>{
+    //     return n*scope.row.price;
+    //   })
+      // for (const index in this.perNumber) {
+        this.$set(this.perNum,scope.$index,this.perNumber[scope.$index]*scope.row.price)
+        // this.perNum[scope.$index] = this.perNumber[scope.$index]*scope.row.price;
+        console.log(this.perNum);
+      // }
+    },
+    checkNum(scope){
+      if((new Number(scope.row.not_amount)<this.perNumber[scope.$index]*scope.row.price)||
+      this.perNumber[scope.$index]<0||
+      (new Number(scope.row.price*scope.row.out_total)<this.perNumber[scope.$index]*scope.row.price)){
+        this.perNumber[scope.$index]=0;
+        this.$message({
+          message:'输入数量错误',
+          type:'error'
+        })
+      }
+      this.mathValue(scope);
+    },
     search(searchInfo) {
       if (!this.isHistory) {
         let newSearch = cloneDeep(searchInfo);
@@ -1541,10 +1615,12 @@ export default {
     sizeChange(size) {
       this.page_size = size;
     },
+    //开票
     openInfo(scope) {
       console.log(scope.row);
       let not_mony = [];
       if (scope.row.invoice_amount > 0) {
+        let a=[]
         invoiceDe(scope.row.order_id).then((res) => {
           // this.invoicList = res.data.res[0].order_infos;
           not_mony = res.data.res;
@@ -1552,12 +1628,15 @@ export default {
           for (const iterator of row) {
             for (const iterator1 of not_mony) {
               if (iterator.order_product_id == iterator1.order_product_id)
-                iterator.not_amount = iterator1.not_amount;
+              {let obj={}
+              obj.not_amount = iterator1.not_amount;
+              a.push(obj)
+                iterator.not_amount = iterator1.not_amount;}
             }
           }
           this.invoicList = row;
           this.visibleInfo = true;
-          for (const iterator of row) {
+          for (const iterator of a) {
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             this.rece_total += new Number(iterator.not_amount);
           }
@@ -1566,7 +1645,7 @@ export default {
         this.invoicList = scope.row.order_infos;
         this.visibleInfo = true;
         for (const iterator of scope.row.order_infos) {
-            this.rece_total += new Number(iterator.product_rece_total);
+            this.rece_total += new Number(iterator.price*iterator.out_total);
           }
       }
       this.show = true;
@@ -1587,6 +1666,7 @@ export default {
       this.show=false;
       this.rece_total = 0;
       this.perNum.length = 0;
+      this.perNumber.length=0;
       this.visibleInfo = false;
       this.fetchData();
     },
@@ -1670,6 +1750,8 @@ export default {
         Receipt(data).then((res) => {
           collectList(this.receiptID).then((res) => {
             this.collectList = res.data.res;
+            this.mathIValue(res.data.res);
+            this.$bus.$emit('edit',[]);
           });
         });
       }
@@ -1692,7 +1774,15 @@ export default {
       this.fetchData();
       // this.$bus.$emit('edit',[]);
     },
-    //
+    //收款计算
+    mathIValue(arra){
+      let hasValue = 0;
+      for (const iterator of arra) {
+        hasValue+=new Number(iterator.amount);
+      }
+      this.value = new Number(arra[0].receipt_amount) - hasValue;
+      // this.value = new Number(scope.row.receipt_amount) - new Number(scope.row.actual_receipt_amount);
+    },
     openCollection(scope) {
       console.log(scope.row);
       this.value=new Number(scope.row.receipt_amount)- new Number(scope.row.actual_receipt_amount);
@@ -1851,9 +1941,11 @@ export default {
 
 .collection {
   .el-drawer {
-    padding: 0 20px;
+    padding: 0  20px;
     min-width: 1400px;
+    overflow: auto;
     .el-drawer__body {
+      position: relative;
       // padding: 0 10px;
     }
   }

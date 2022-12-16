@@ -640,6 +640,7 @@
                 <el-image
                   style="position: relative"
                   :src="url + item.outdown_image"
+                  :fit="'contain'"
                   :preview-src-list="[
                     url + item.outdown_image,
                   ]"
@@ -776,7 +777,7 @@
           class-name="li first"
         >
           <template slot-scope="scope">
-            {{ scope.$index + 1 }}
+            {{ (page_current-1)*100+scope.$index + 1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -1200,7 +1201,7 @@ export default {
     },
     checkNumber(scope) {
       if (
-        scope.not_out_number < this.perNumber[scope.$index] ||
+        (scope.row.stock_number < this.perNumber[scope.$index]) ||
         this.perNumber[scope.$index] < 0
       ) {
         this.$set(this.perNumber, scope.$index, 0);
@@ -1283,7 +1284,6 @@ export default {
       for (const index in this.addObj.order_infos) {
         let obj = {};
         obj.outblound_id = this.addObj.order_infos[index].inblound_id;
-
         if (
           this.addObj.order_infos[index].stock_number < this.perNumber[index]
         ) {

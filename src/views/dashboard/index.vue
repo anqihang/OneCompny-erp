@@ -1,17 +1,89 @@
 <template>
   <div class="dashboard-container main">
-    <div id="input">
-      <div>
-        <div style="display: flex;align-items: center;" v-if="!show.a">
-          <svg
+    <div id="sort">
+      <!-- <Echart @showBigE="showBig(1)" @closeE="close('a')" :show="show.a"></Echart> -->
+      <!-- <div v-show="show.a" class="s">
+        <div class="di" id="sharePie" @click="showBig(1)"></div>
+        <div class="close" @click="close('a')">
+          <el-image
+            style="width: 30px; height: 30px"
+            :src="require('@/assets/cha.png')"
+            :fit="'fit'"
+          ></el-image>
+        </div>
+      </div> -->
+      <!-- <div v-show="show.b" class="s">
+        <div class="di" id="shareBar" @click="showBig(2)"></div>
+        <div class="close" @click="close('b')">
+          <el-image
+            style="width: 30px; height: 30px"
+            :src="require('@/assets/cha.png')"
+            :fit="'fit'"
+          ></el-image>
+        </div>
+      </div>
+      <div v-show="show.c" class="s">
+        <div class="di">3</div>
+        <div class="close" @click="close('c')">
+          <el-image
+            style="width: 30px; height: 30px"
+            :src="require('@/assets/cha.png')"
+            :fit="'fit'"
+          ></el-image>
+        </div>
+      </div>
+      <div v-show="show.aa" class="s">
+        <div class="di">4</div>
+        <div class="close" @click="close('aa')">
+          <el-image
+            style="width: 30px; height: 30px"
+            :src="require('@/assets/cha.png')"
+            :fit="'fit'"
+          ></el-image>
+        </div>
+      </div>
+      <div v-show="show.bb" class="s">
+        <div class="di">5</div>
+        <div class="close" @click="close('bb')">
+          <el-image
+            style="width: 30px; height: 30px"
+            :src="require('@/assets/cha.png')"
+            :fit="'fit'"
+          ></el-image>
+        </div>
+      </div>
+      <div v-show="show.cc" class="s">
+        <div class="di">6</div>
+        <div class="close" @click="close('cc')">
+          <el-image
+            style="width: 30px; height: 30px"
+            :src="require('@/assets/cha.png')"
+            :fit="'fit'"
+          ></el-image>
+        </div>
+      </div> -->
+      <div v-if="allShow" id="add">
+        <div style="display: flex; align-items: center">
+          <el-image
+            @click="showInput(0)"
+            style="width: 45px; height: 45px; cursor: pointer"
+            :src="require('@/assets/jia.png')"
+            :fit="'fit'"
+          ></el-image>
+          <!-- <svg
             @click="showInput(0)"
             class="icon"
             aria-hidden="true"
-            style="height: 45px; font-size: 40px; vertical-align: top;cursor: pointer;"
+            style="
+              height: 45px;
+              font-size: 40px;
+              vertical-align: top;
+              cursor: pointer;
+            "
           >
-            <use xlink:href="#icon-jiahao-copy"></use>
-          </svg>
-          <el-select v-model="select" v-if="addShow[0]" @change="hiddenInput('a',0)">
+            <use xlink:href="#icon-add2-copy"></use>
+          </svg> -->
+          <el-select v-model="select" v-if="addShow" @change="hiddenInput()">
             <el-option
               v-for="(item, index) in list"
               :key="index"
@@ -19,38 +91,10 @@
               :value="item.id"
             ></el-option>
           </el-select>
-        </div>        
-      </div>
-      <div>
-        <div style="display: flex;align-items: center;" v-if="!show.b">
-          <svg
-            @click="showInput(1)"
-            class="icon"
-            aria-hidden="true"
-            style="height: 45px; font-size: 40px; vertical-align: top;cursor: pointer;"
-          >
-            <use xlink:href="#icon-jiahao-copy"></use>
-          </svg>
-          <el-select v-model="select" v-if="addShow[1]" @change="hiddenInput('b',1)">
-            <el-option
-              v-for="(item, index) in list"
-              :key="index"
-              :label="item.name"
-              :value="item.id"
-            ></el-option>
-          </el-select>
-        </div>        
+        </div>
       </div>
     </div>
-    <div id="sort">
-      <div v-show="show.a" class="di" id="sharePie" @click="showBig(1)"></div>
-      <div v-show="show.b" class="di" id="shareBar" @click="showBig(2)"></div>
-      <div v-show="show.c" class="di">3</div>
-      <div v-show="show.aa" class="di">4</div>
-      <div v-show="show.bb" class="di">5</div>
-      <div v-show="show.cc" class="di">6</div>
-    </div>
-    
+
     <el-dialog
       id="dialog"
       :visible.sync="visibleDiolog"
@@ -68,11 +112,26 @@ import * as echarts from "echarts";
 import { normalize } from "path";
 import { sharePie, shareBar } from "@/api/table.js";
 import Sortable from "sortablejs";
+import { Icon } from "element-ui";
+import Echart from "@/components/Echart/Echart.vue";
+import Vue from "vue";
 
 export default {
   name: "Dashboard",
+  components: {
+    Echart,
+  },
   computed: {
     ...mapGetters(["name"]),
+    allShow() {
+      let a = false;
+      for (const index in this.show) {
+        if (this.show[index] == false) {
+          a = true;
+        }
+      }
+      return a;
+    },
   },
   created() {},
   data() {
@@ -85,9 +144,12 @@ export default {
       visibleDiolog: false,
       select: null,
       list: [
-        { id: 1, name: "客户订单数" },
-        { id: 2, name: "b" },
-        { id: 3, name: "c" },
+        { id: "a", name: "客户订单数" },
+        { id: "b", name: "客户订单额" },
+        { id: "c", name: "每月订单额" },
+        { id: "aa", name: "每月订单额状态" },
+        { id: "bb", name: "订单出货数" },
+        { id: "cc", name: "订单额状态" },
       ],
       show: {
         a: false,
@@ -97,44 +159,90 @@ export default {
         bb: false,
         cc: false,
       },
-      addShow:{
-        0:false,
-        1:false
-      }
+      addShow: false,
     };
   },
   mounted() {
-    this.f();
-    this.s();
+    // this.f();
+    // this.s();
+    this.$bus.$on("closeE", this.close);
+    this.$bus.$on("showBigE", this.showBig);
     //拖拽排序
     let sort = document.querySelector("#sort");
     var sortable = new Sortable(sort, {
       animation: 150,
     });
   },
-  updated(){
+  beforeDestroy() {
+    this.$bus.$off();
+  },
+  updated() {
     // this.chart.resize();
-    let sharePie = echarts.init(document.getElementById('sharePie'));
-    sharePie.resize();
-    let shareBar = echarts.init(document.getElementById('shareBar'));
-    shareBar.resize();
+    // let sharePie = echarts.init(document.getElementById("sharePie"));
+    // sharePie.resize();
+    // let shareBar = echarts.init(document.getElementById("shareBar"));
+    // shareBar.resize();
   },
   methods: {
-    showInput(index){
-      this.addShow[index] = !this.addShow[index];
+    close(index) {
+      this.show[index] = false;
+      let add = document.querySelector('#add');
+      let mo = document.querySelector(`#${index}`);
+      let sort = document.getElementById('sort');
+      sort.insertBefore(mo,add);
     },
-    hiddenInput(a,index){
-      this.show[a] = true;
-      this.addShow[index] =false;
-      this.select=null
+    showInput(index) {
+      this.addShow = !this.addShow;
     },
-    showBig(num) {
+    hiddenInput() {
+      this.show[this.select] = true;
+      let se = this.select;
+      // this.show[a] = true;
+      this.addShow = false;
+      this.select = null;
+      // let sort = document.querySelector('#sort');
+      let add = document.querySelector("#add");
+      let sort = document.querySelector("#sort");
+      // add.insertAdjacentElement('beforebegin',Echart);
+      let showE = this.show;
+      let ok = true;
+      for (const index of sort.children) {
+        if (index.classList[1] == se) {
+          ok = false;
+        }
+      }
+      if (ok) {
+        let instance = Vue.extend({
+          render: (h) =>
+            h(Echart, {
+              props: {
+                show: showE,
+                id: se,
+              },
+            }),
+        });
+        //在文档外渲染随后挂载
+        let t = new instance().$mount();
+        add.insertAdjacentElement("beforebegin", t.$el);
+      }
+      switch (se) {
+        case "a":
+          {
+            this.f();
+          }
+          break;
+        case "b":
+          this.s();
+          break;
+      }
+    },
+    showBig(index) {
       this.visibleDiolog = true;
-      switch (num) {
-        case 1:
+      switch (index) {
+        case "a":
           this.f("show");
           break;
-        case 2:
+        case "b":
           this.s("show");
           break;
       }
@@ -225,7 +333,7 @@ export default {
             top: 80,
             right: 100,
             bottom: 10,
-            left: 20,
+            left: 30,
             containLabel: true,
             width: "auto",
           },
@@ -296,12 +404,35 @@ export default {
     grid-template-columns: repeat(2, 1fr);
     grid-row-gap: 10px;
     grid-column-gap: 10px;
+    grid-template-areas:
+      "a b"
+      "c aa"
+      "bb cc";
   }
   #sort {
     @include grid;
-    & > .di {
-      margin: 5px;
+    & > .s {
       box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+      margin: 5px;
+      position: relative;
+      padding: 0 auto;
+      & > .di {
+        display: flex;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        // margin: 5px;
+        // position: relative;
+        // box-shadow: rgba(0, 0, 0, 0.15) 0px 2px 8px;
+      }
+      .close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 30px;
+        width: 30px;
+        cursor: pointer;
+      }
     }
   }
   #input {
@@ -316,5 +447,12 @@ export default {
   .el-dialog {
     margin: 0 auto !important;
   }
+}
+.clo {
+  width: 100%;
+  height: 100%;
+}
+.b {
+  // grid-area: b;
 }
 </style>

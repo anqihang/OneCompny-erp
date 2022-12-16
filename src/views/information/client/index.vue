@@ -254,7 +254,7 @@
       >
         <el-table-column align="center" label="序号" width="50" class-name="li first">
           <template slot-scope="scope">
-            {{ scope.$index + 1 }}
+            {{ (page_current-1)*100+scope.$index + 1}}
             <!-- 99999 -->
           </template>
         </el-table-column>
@@ -680,6 +680,7 @@ export default {
       this.visibleDialog_Person = true;
     },
     shutDownDialog_person() {
+      this.$refs.personForm.resetFields();
       this.isEdit = false;
       this.personInfo = {
         name: "",
@@ -767,11 +768,14 @@ export default {
                   });
               } else {
                 addClient(this.clientInfo)
-                  .then((res) => {})
+                  .then((res) => {
+                    if(res.code==200){
+                      this.shutDownDialog();
+                    }
+                  })
                   .finally(() => {
                     // this.FlistLoading = false;
                     this.listLoading = false;
-                    this.shutDownDialog();
                     this.fetchData();
                   });
               }
@@ -790,6 +794,7 @@ export default {
       this.visibleDialog = true;
     },
     shutDownDialog() {
+      this.$refs.clientForm.resetFields();
       this.visibleDialog = false;
       this.$refs["clientForm"].resetFields();
       this.isEdit = false;

@@ -690,3 +690,14 @@ export function checkRouter(){
     method:'get'
   })
 }
+//
+//下载
+export function downLoadB(params){
+  return request({
+    url:"/admin/index/downloads",
+    method:'get',
+    params:{
+      url:params
+    }
+  })
+}

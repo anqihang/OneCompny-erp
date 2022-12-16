@@ -656,6 +656,7 @@
                 <el-image
                   style="position: relative"
                   :src="url + item.godown_image"
+                  :fit="'contain'"
                   :preview-src-list="[
                     url + item.godown_image,
                   ]"
@@ -787,7 +788,7 @@
           class-name="li first"
         >
           <template slot-scope="scope">
-            {{ scope.$index + 1 }}
+            {{ (page_current-1)*100+scope.$index + 1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -1166,10 +1167,10 @@ export default {
   methods: {
     checkInNum(scope) {
       if (
-        scope.not_in_number < this.perNum[scope.$index] ||
-        this.perNum[scope.$index]
+        (scope.row.not_in_number < this.perNumber[scope.$index]) ||
+        this.perNumber[scope.$index]<0
       ) {
-        this.$set(this.perNum, scope.$index, 0);
+        this.$set(this.perNumber, scope.$index, 0);
         this.$message({
           message: "入库数错误",
           type: "error",
@@ -1578,7 +1579,7 @@ export default {
 }
 
 .infoD {
-  padding: 0 20px;
+  // padding: 0 20px;
   .el-drawer {
     // overflow:auto;
     .el-drawer__body {

@@ -13,7 +13,7 @@
       :button="[
         { title: '搜索', type: '', if: true },
         { title: '重置', type: '', if: true },
-        { title: '添加', type: 'primary', if:addP},
+        { title: '添加', type: 'primary', if: addP },
       ]"
     ></Search>
     <!-- <el-pagination
@@ -38,14 +38,15 @@
       :visible.sync="visibleDialog"
       @close="closeAddDrawer"
       ref="product"
-      @mousedown.native="handleWrapperMousedown($event,'product')"
-      @mouseup.native="handleWrapperMouseup($event,'product')"
+      @mousedown.native="handleWrapperMousedown($event, 'product')"
+      @mouseup.native="handleWrapperMouseup($event, 'product')"
       :wrapperClosable="false"
     >
       <div>
         <Search
           ref="son"
           :info="propInfo"
+          :orders="isEdit"
           :search="[
             { title: '客户名称', type: 'autocomplate' },
             { title: '客户料号', type: 'input' },
@@ -138,10 +139,9 @@
           >
         </div>
         <div>
-          <el-button size="small" @click="download">
-            <a :href="url+'/uploads/temple/产品BOM模板.xlsx'"
-              >下载模板</a
-            >
+          <el-button size="small" @click="downloadB(url+'/uploads/temple/产品BOM模板.xls')">
+            <!-- <a :href="url + '/uploads/temple/产品BOM模板.xlsx'"> 下载模板 </a> -->
+            下载模板
           </el-button>
         </div>
       </div>
@@ -366,10 +366,9 @@
     <!-- 查看 -->
     <el-drawer
       ref="show"
-      @mousedown.native="handleWrapperMousedown($event,'show')"
-      @mouseup.native="handleWrapperMouseup($event,'show')"
+      @mousedown.native="handleWrapperMousedown($event, 'show')"
+      @mouseup.native="handleWrapperMouseup($event, 'show')"
       :wrapperClosable="false"
-
       class="addProductionDrawer"
       direction="rtl"
       size="35%"
@@ -424,13 +423,12 @@
       >
         <div>产品BOM信息</div>
         <div>
-          <el-button size="small" type="primary" @click="download" :disabled="!exportP">
-            <a
-              :href="
-                url+'/admin/Product/export_bom?id=' +
-                editId
-              "
-            >
+          <el-button
+            size="small"
+            type="primary"
+            :disabled="!exportP"
+          >
+            <a :href="url + '/admin/Product/export_bom?id=' + editId">
               下载BOM表格</a
             >
           </el-button>
@@ -739,9 +737,14 @@
         :header-cell-style="{ left: 0, right: 0 }"
         @sort-change="sort"
       >
-        <el-table-column align="center" label="序号" width="50" class-name="li first">
+        <el-table-column
+          align="center"
+          label="序号"
+          width="50"
+          class-name="li first"
+        >
           <template slot-scope="scope">
-            {{ scope.$index + 1 }}
+            {{(page_current-1)*100+scope.$index + 1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -921,8 +924,12 @@
           class-name="button"
         >
           <template slot-scope="scope" style="display: flex; flex-wrap: wrap">
-            <el-button type="primary" size="small" @click="showInfo(scope.row)"
-              v-if="infoP">产品信息</el-button
+            <el-button
+              type="primary"
+              size="small"
+              @click="showInfo(scope.row)"
+              v-if="infoP"
+              >产品信息</el-button
             >
             <el-button type="info" size="small" v-if="!infoP"></el-button>
 
@@ -942,7 +949,12 @@
               icon-color="red"
               @onConfirm="deleteP(scope.row)"
             >
-              <el-button type="danger" size="small" slot="reference" v-if="deletePro">
+              <el-button
+                type="danger"
+                size="small"
+                slot="reference"
+                v-if="deletePro"
+              >
                 删除
               </el-button>
             </el-popconfirm>
@@ -980,6 +992,7 @@ import {
   getBOMList,
   deleteProduction,
   downLoad,
+  downLoadB,
   editProduction,
 } from "@/api/table";
 import Search from "@/components/Search/index.vue";
@@ -991,7 +1004,7 @@ import { Readable } from "stream";
 XLSX.stream.set_readable(Readable);
 import * as cpexcel from "xlsx/dist/cpexcel.full.mjs";
 XLSX.set_cptable(cpexcel);
-import {url} from '@/utils/url'
+import { url } from "@/utils/url";
 
 export default {
   filters: {
@@ -1004,36 +1017,40 @@ export default {
       return statusMap[status];
     },
   },
-  computed:{
-    url(){
+  computed: {
+    url() {
       return url;
     },
-    auth_id(){
-      return localStorage.getItem('auth_id').split(',');
+    auth_id() {
+      return localStorage.getItem("auth_id").split(",");
     },
-    addP(){
+    addP() {
       // return true;
-      return this.auth_id.includes('13');
+      return this.auth_id.includes("13");
     },
-    importBom(){
-      return this.auth_id.includes('14');
+    importBom() {
+      return this.auth_id.includes("14");
     },
-    editP(){
+    editP() {
       // return true;
-      return this.auth_id.includes('15');
-    },exportP(){
-      return this.auth_id.includes('16');
-    },deletePro(){
-      return this.auth_id.includes('17');
-    },infoP(){
-      return this.auth_id.includes('18');
-    }
+      return this.auth_id.includes("15");
+    },
+    exportP() {
+      return this.auth_id.includes("16");
+    },
+    deletePro() {
+      return this.auth_id.includes("17");
+    },
+    infoP() {
+      return this.auth_id.includes("18");
+    },
   },
   components: {
     Search,
   },
   data() {
     return {
+      isorder:false,
       submit: 0,
       editSend: 0,
       propInfo: null,
@@ -1069,7 +1086,7 @@ export default {
       isEditId: null,
       aaa: null,
       //
-      classmodel:null,
+      classmodel: null,
       //
       productionInfo: {
         companyName: "",
@@ -1126,8 +1143,11 @@ export default {
     this.$bus.$off();
   },
   methods: {
-    download() {
-      
+    downloadB(url) {
+      downLoadB(url).then((res)=>{
+        console.log(res);
+        location.href=res.data.res;
+      })
     },
     beforeUpload(file) {},
     changeBOMList(file, fileList) {
@@ -1346,6 +1366,7 @@ export default {
     },
     //添加后确定
     Determine(searchInfo) {
+      console.log(1);
       const file = document.querySelector(".el-upload__input");
       const target = file.files[0];
       let data = new FormData();

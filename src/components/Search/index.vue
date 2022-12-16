@@ -69,20 +69,20 @@
               >{{ infos[index] }}</span
             >
             <form class="form">
-            <input
-              :disabled="item.disabled"
-              class="file"
-              type="file"
-              @change="showName(index)"
-              style="
-                opacity: 0;
-                position: relative;
-                top: -29px;
-                left: 12px;
-                z-index: 2;
-              "
-            />
-          </form>
+              <input
+                :disabled="item.disabled"
+                class="file"
+                type="file"
+                @change="showName(index)"
+                style="
+                  opacity: 0;
+                  position: relative;
+                  top: -29px;
+                  left: 12px;
+                  z-index: 2;
+                "
+              />
+            </form>
           </div>
           <!-- // -->
           <div v-if="item.type == 'input'">
@@ -91,7 +91,7 @@
               class="input-el"
               v-model="searchInfo[index]"
               :readonly="item.disabled"
-              @change="checkValue(item,index)"
+              @input="checkValue(item, index)"
             >
               <template slot="prepend">{{ item.title }}</template>
             </el-input>
@@ -182,7 +182,7 @@ export default {
       fileName: null,
       infos: [],
       isOrder: false,
-      removeFile:true,
+      removeFile: true,
     };
   },
   props: {
@@ -206,28 +206,31 @@ export default {
         return [];
       },
     },
-    value:{
-      type:Number,
-    }
+    value: {
+      type: Number,
+    },
+    orders: {
+      type: Boolean,
+    },
   },
   mounted() {
     this.$bus.$on("edit", this.copy);
   },
   beforeDestroy() {
-    this.$bus.$off('edit');
+    this.$bus.$off("edit");
   },
   methods: {
-    checkValue(item,index){
+    checkValue(item, index) {
       console.log(this.value);
-      if(item.title=='付款金额'){
-      if(this.searchInfo[index]>this.value||this.searchInfo[index]<0){
-        // this.searchInfo[index] =0;
-        this.$set(this.searchInfo,index,0)
-        this.$message({
-          message:'金额错误',
-          type:'error'
-        })
-      }
+      if (item.title == "付款金额") {
+        if (this.searchInfo[index] > this.value || this.searchInfo[index] < 0) {
+          // this.searchInfo[index] =0;
+          this.$set(this.searchInfo, index, 0);
+          this.$message({
+            message: "金额错误",
+            type: "error",
+          });
+        }
       }
       // this.searchInfo[index]
     },
@@ -251,9 +254,9 @@ export default {
       }
     },
     remove(info) {
-      let form = document.querySelector('.form');
+      let form = document.querySelector(".form");
       let fi = document.querySelector(".file");
-      if(fi){
+      if (fi) {
         // fi.value = "";
         form.reset();
       }
@@ -261,14 +264,14 @@ export default {
 
       this.searchInfo = cloneDeep(info);
       this.infos = cloneDeep(info);
-      console.log('remove',fi.files);
+      console.log("remove", fi.files);
     },
     copy(info) {
       //关闭
       this.fileName = "";
       this.isOrder = false;
       let fi = document.querySelector(".file");
-      if(fi){
+      if (fi) {
         fi.value = "";
       }
       // fi.outerHTML = fi.outerHTML;
@@ -405,8 +408,10 @@ export default {
           break;
         case "确定":
           {
-
-            if (this.isOrder) {
+            console.log(1);
+            console.log(this.orders);
+            if (this.isOrder || this.orders) {
+              console.log(2);
               getCompanyList(this.searchInfo[0]).then((res) => {
                 // this.searchInfo[0]=res.data.res[0].id
                 if (!res.data.res[0]) {
@@ -495,7 +500,7 @@ export default {
           border: 0;
           right: 0;
           left: unset;
-          i{
+          i {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -528,7 +533,7 @@ export default {
   align-items: flex-start;
   padding: 5px 0;
   &__left {
-    margin-left:-5px;
+    margin-left: -5px;
     display: flex;
     // flex-direction: column;
     // align-items: flex-end;
@@ -610,11 +615,11 @@ export default {
             line-height: 30px;
           }
         }
-        .el-input__suffix{
+        .el-input__suffix {
           display: flex;
           align-items: center;
-          &-inner{
-            height: 100%!important;
+          &-inner {
+            height: 100% !important;
           }
         }
       }
@@ -622,7 +627,7 @@ export default {
   }
   &__right {
     // width: 264px;
-margin-right:-5px;
+    margin-right: -5px;
     .button {
       box-sizing: border-box;
       max-width: 264px;
