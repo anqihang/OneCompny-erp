@@ -1,9 +1,9 @@
 <template>
   <div class="s" v-show="show[id]" :class="id" :id="id">
     <div  class="di" :id="list[id]" @click="showBig(id)"></div>
-    <div class="close" @click="close(id)">
+    <div class="close" @click="close(id)" style="top:13px!important;right:5px;">
       <el-image
-            style="width: 30px; height: 30px"
+            style="width: 20px; height: 20px"
             :src="require('@/assets/cha.png')"
             :fit="'fit'"
           ></el-image>
