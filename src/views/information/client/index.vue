@@ -64,18 +64,19 @@
             placeholder="请输入地址"
           ></el-input>
         </el-form-item>
+         <el-form-item label="税号" prop="taxCode">
+          <el-input
+            v-model="clientInfo.taxCode"
+            placeholder="请输入税号"
+          ></el-input>
+        </el-form-item>
         <el-form-item label="银行账号" prop="bankAccount">
           <el-input
             v-model="clientInfo.bankAccount"
             placeholder="请输入银行账号"
           ></el-input>
         </el-form-item>
-        <el-form-item label="税号" prop="taxCode">
-          <el-input
-            v-model="clientInfo.taxCode"
-            placeholder="请输入税号"
-          ></el-input>
-        </el-form-item>
+       
         <el-form-item label="开户行" prop="openBankAccount">
           <el-input
             v-model="clientInfo.openBankAccount"
@@ -312,7 +313,7 @@
              </template>
             <!-- 工行惠州分行江南支行 -->
           </el-table-column>
-          <el-table-column align="center" label="银行账号" width="180" class-name="li" key="4">
+          <el-table-column align="center" label="银行账号" width="190" class-name="li" key="4">
             <template slot-scope="scope"
               >{{ scope.row.bank_account }}
             </template>

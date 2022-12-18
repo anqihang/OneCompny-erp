@@ -63,10 +63,10 @@
         </div>
       </div> -->
       <div v-if="allShow" id="add">
-        <div style="display: flex; align-items: top">
+        <div style="display: flex; align-items: center;height:40px;">
           <el-image
             @click="showInput(0)"
-            style="width: 30px; height: 30px; cursor: pointer;margin-right:0;"
+            style="width: 20px; height: 20px; cursor: pointer;margin-right:0;"
             :src="require('@/assets/jia.png')"
             :fit="'fit'"
           ></el-image>
@@ -333,7 +333,7 @@ export default {
             top: 80,
             right: 100,
             bottom: 10,
-            left: 30,
+            left: 20,
             containLabel: true,
             width: "auto",
           },

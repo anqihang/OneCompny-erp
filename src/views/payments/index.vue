@@ -1373,7 +1373,7 @@
           label="状态"
           align="center"
           width="80"
-          class-name="li index"
+          class-name="li index state"
         >
           <template slot-scope="scope">
             <el-tag
@@ -1961,5 +1961,10 @@ sm:0,
 }
 .hei {
   min-height: 127px !important;
+}
+.state{
+  .cell{
+    margin-top: 14px;
+  }
 }
 </style>

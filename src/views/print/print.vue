@@ -1,5 +1,5 @@
 <template>
-  <div class="print">
+  <div class="print" style="page-break-after: always">
     <div class="t0">
       <div style="font-size: 20px; margin-bottom: 5px">
         东莞市同宇电子科技有限公司
@@ -17,7 +17,7 @@
       </div>
       <div style="font-size: 20px; margin: 7px 0 0">送货单</div>
     </div>
-    <div class="t1">
+    <!-- <div class="t1">
       <div>
         <div>客户名称:{{ printInfo.company_name || "" }}</div>
         <div>送货单号:{{ out_number }}</div>
@@ -32,12 +32,32 @@
             <div style="padding: 0; text-align: end">期:</div>
           </div>
           <div>
-            <!-- {{new Date().toLocaleString()}} -->
+            {{ create_time }}
+          </div>
+        </div>
+      </div>
+    </div> -->
+    <div class="tt">
+      <div>
+        <div>客户名称:{{ printInfo.company_name || "" }}</div>
+        <div>客户地址:{{ printInfo.address }}</div>
+      </div>
+      <div>
+        <div>送货单号:{{ out_number }}</div>
+        <div style="display: flex">
+          <div
+            style="width: 55px; display: flex; justify-content: space-between"
+          >
+            <div style="padding: 0">日</div>
+            <div style="padding: 0; text-align: end">期:</div>
+          </div>
+          <div>
             {{ create_time }}
           </div>
         </div>
       </div>
     </div>
+
     <div class="t2">
       <table>
         <tbody>
@@ -53,31 +73,32 @@
             <th style="width: 100px">累交数量</th>
             <th scope="col" style="width: 150px">备注</th>
           </tr>
-          <!-- <tr v-for="(item, index1) in printInfo.order_infos" :key="index1">
+
+          <tr v-for="(item, index1) in order_infos" :key="index1">
             <td>{{ index1 + 1 }}</td>
             <td>{{ outInfo.order_number }}</td>
             <td>{{ item.product_code }}</td>
             <td>{{ item.product_name }}</td>
             <td>{{ item.product_specs }}</td>
-            <td>{{  }}</td>
+            <td>{{ order_infos[index1].number }}</td>
             <td></td>
-            <td>{{ item.outblound_infos[index].number }}</td>
+            <td>
+              {{
+                item.outblound_infos[index]
+                  ? item.outblound_infos[index].number
+                  : 0
+              }}
+            </td>
             <td>{{ item.out_total }}</td>
-            <td>{{ item.outblound_infos[index].remarks }}</td>
-          </tr> -->
-          <tr v-for="(item, index1) in printInfo.order_infos" :key="index1">
-            <td>{{ index1 + 1 }}</td>
-            <td>{{ outInfo.order_number }}</td>
-            <td>{{ item.product_code }}</td>
-            <td>{{ item.product_name }}</td>
-            <td>{{ item.product_specs }}</td>
-            <td>{{ outInfo.order_infos[index1].number }}</td>
-            <td></td>
-            <td>{{ item.outblound_infos[index]?item.outblound_infos[index].number:0 }}</td>
-            <td>{{ item.out_total }}</td>
-            <td>{{ item.outblound_infos[index]?item.outblound_infos[index].remarks:'' }}</td>
+            <td>
+              {{
+                item.outblound_infos[index]
+                  ? item.outblound_infos[index].remarks
+                  : ""
+              }}
+            </td>
           </tr>
-          <tr v-if="!(printInfo.order_infos.length == 2)">
+          <tr v-if="!(order_infos.length >= 2)">
             <td>2</td>
             <td></td>
             <td></td>
@@ -89,7 +110,7 @@
             <td></td>
             <td></td>
           </tr>
-          <tr v-if="!(printInfo.order_infos.length == 3)">
+          <tr v-if="!(order_infos.length >= 3)">
             <td>3</td>
             <td></td>
             <td></td>
@@ -101,7 +122,7 @@
             <td></td>
             <td></td>
           </tr>
-          <tr v-if="!(printInfo.order_infos.length == 4)">
+          <tr v-if="!(order_infos.length >= 4)">
             <td>4</td>
             <td></td>
             <td></td>
@@ -113,7 +134,7 @@
             <td></td>
             <td></td>
           </tr>
-          <tr v-if="!(printInfo.order_infos.length == 5)">
+          <tr v-if="!(order_infos.length >= 5)">
             <td>5</td>
             <td></td>
             <td></td>
@@ -125,7 +146,7 @@
             <td></td>
             <td></td>
           </tr>
-          <tr v-if="!(printInfo.order_infos.length == 6)">
+          <tr v-if="!(order_infos.length >= 6)">
             <td>6</td>
             <td></td>
             <td></td>
@@ -171,6 +192,9 @@ export default {
     printInfo: {
       type: Object,
     },
+    order_infos: {
+      type: Array,
+    },
     outInfo: {
       type: Object,
     },
@@ -198,8 +222,7 @@ export default {
       for (const iterator of this.printInfo.order_infos) {
         // value+=iterator.price+
         if (iterator.outblound_infos[this.index]) {
-          value +=
-            iterator.price * iterator.outblound_infos[this.index].number ;
+          value += iterator.price * iterator.outblound_infos[this.index].number;
         }
       }
       function NumFormat(value) {
@@ -262,7 +285,7 @@ export default {
   width: 700px;
   //   height: 500px;
   background-color: white;
-  position: fixed;
+  // position: fixed;
   top: 20px;
   left: 0;
   right: 0;
@@ -272,6 +295,23 @@ export default {
   align-items: center;
   flex-direction: column;
   padding: 40px 10px 0;
+  .tt {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    font-family: "Courier New", Courier, monospace;
+    width: 100%;
+    padding: 0 5px;
+    & > div {
+      display: flex;
+      & > div:first-child {
+        width: 70%;
+      }
+      & > div:last-child {
+        width: 30%;
+      }
+    }
+  }
   .t0 {
     width: 100%;
     font-family: SimSun;
@@ -312,8 +352,10 @@ export default {
     table {
       margin: 0 auto;
       width: 100%;
-      border-collapse: collapse;
+      // border-collapse: collapse;
+      // border-collapse: unset;
       border-spacing: 0px;
+      border: 1px solid black;
 
       td,
       th {

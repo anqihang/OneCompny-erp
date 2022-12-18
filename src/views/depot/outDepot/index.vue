@@ -641,9 +641,7 @@
                   style="position: relative"
                   :src="url + item.outdown_image"
                   :fit="'contain'"
-                  :preview-src-list="[
-                    url + item.outdown_image,
-                  ]"
+                  :preview-src-list="[url + item.outdown_image]"
                 ></el-image>
               </div>
             </template>
@@ -663,29 +661,29 @@
                   flex-direction: column;
                 "
               >
-              <div
-                v-for="(item, index) in scope.row.outblound_infos"
-                :key="index"
-                style="
-                  height: 126px;
-                  position: relative;
-                  text-align: start;
-                  border-top: 1px solid #ebeef5;
-                  margin-top: -2px;
-                "
-              >
-                <span
-                  slot="reference"
+                <div
+                  v-for="(item, index) in scope.row.outblound_infos"
+                  :key="index"
                   style="
-                    display: flex;
-                    justify-content: start;
-                    text-align: start !important;
+                    height: 126px;
+                    position: relative;
+                    text-align: start;
+                    border-top: 1px solid #ebeef5;
+                    margin-top: -2px;
                   "
                 >
-                  {{ item.remarks }}
-                </span>
+                  <span
+                    slot="reference"
+                    style="
+                      display: flex;
+                      justify-content: start;
+                      text-align: start !important;
+                    "
+                  >
+                    {{ item.remarks }}
+                  </span>
+                </div>
               </div>
-            </div>
             </template>
           </el-table-column>
           <el-table-column
@@ -695,7 +693,7 @@
             width="200"
             class="operation"
             class-name="button editButton"
-            style="border-left: 1px solid red;"
+            style="border-left: 1px solid red"
           >
             <template
               slot-scope="scope"
@@ -736,7 +734,11 @@
                 </el-button>
 
                 <el-button type="info" size="small"></el-button>
-                <el-button type="primary" size="small" @click="print(index)" v-print="'#printBox'"
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="print(index)"
+                  v-print="'#printBox'"
                   >打印</el-button
                 >
 
@@ -777,7 +779,7 @@
           class-name="li first"
         >
           <template slot-scope="scope">
-            {{ (page_current-1)*100+scope.$index + 1 }}
+            {{ (page_current - 1) * 100 + scope.$index + 1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -1067,7 +1069,12 @@
               icon-color="red"
               @onConfirm="deleteOut(scope.row)"
             >
-              <el-button type="danger" size="small" slot="reference" v-if="deleteO">
+              <el-button
+                type="danger"
+                size="small"
+                slot="reference"
+                v-if="deleteO"
+              >
                 删除
               </el-button>
             </el-popconfirm>
@@ -1094,7 +1101,24 @@
       >
       </el-pagination>
     </div>
-    <Print v-show="showPrint" ref="print" id="printBox"  :printInfo="printInfo" :outInfo="outInfo" :index="index"></Print>
+    <div ref="print" id="printBox">
+      <Print
+        style="page-break-after: always"
+        v-show="showPrint && printInfo.order_infos.length >= 1"
+        :order_infos="printInfo.order_infos.slice(0, 6)"
+        :printInfo="printInfo"
+        :outInfo="outInfo"
+        :index="index"
+      ></Print>
+      <Print
+        style="page-break-after: always"
+        v-show="showPrint && printInfo.order_infos.length >= 7"
+        :order_infos="printInfo.order_infos.slice(6, 12)"
+        :printInfo="printInfo"
+        :outInfo="outInfo"
+        :index="index"
+      ></Print>
+    </div>
   </div>
 </template>
 
@@ -1110,28 +1134,28 @@ import {
 import Search from "@/components/Search/index.vue";
 import cloneDeep from "lodash/cloneDeep";
 import Print from "@/views/print/print.vue";
-import {url} from '@/utils/url'
+import { url } from "@/utils/url";
 export default {
   components: {
     Search,
     Print,
   },
   computed: {
-    url(){
+    url() {
       return url;
     },
-    auth_id(){
-      return localStorage.getItem('auth_id').split(',');
+    auth_id() {
+      return localStorage.getItem("auth_id").split(",");
     },
-    outS(){
-      return this.auth_id.includes('26')
+    outS() {
+      return this.auth_id.includes("26");
     },
-    deleteO(){
-      return this.auth_id.includes('27')
+    deleteO() {
+      return this.auth_id.includes("27");
     },
-    editO(){
-      return this.auth_id.includes('28')
-    }
+    editO() {
+      return this.auth_id.includes("28");
+    },
   },
   filters: {
     statusFilter(status) {
@@ -1177,10 +1201,12 @@ export default {
       },
       //
       classmodel: null,
-      printInfo:null,
-      outInfo:null,
-      index:0,
-      showPrint:true,
+      printInfo: {
+        order_infos: [],
+      },
+      outInfo: null,
+      index: 0,
+      showPrint: true,
     };
   },
   created() {
@@ -1201,7 +1227,7 @@ export default {
     },
     checkNumber(scope) {
       if (
-        (scope.row.stock_number < this.perNumber[scope.$index]) ||
+        scope.row.stock_number < this.perNumber[scope.$index] ||
         this.perNumber[scope.$index] < 0
       ) {
         this.$set(this.perNumber, scope.$index, 0);
@@ -1277,7 +1303,7 @@ export default {
     //发送出库信息
     outStorage(searchInfo) {
       // this.print();
-       
+
       let data = new FormData();
       let infos = [];
       let ok = true;
@@ -1358,8 +1384,8 @@ export default {
     },
     //
     openInfo(row) {
-      this.showPrint =true;
-      this.outInfo = row
+      this.showPrint = true;
+      this.outInfo = row;
       this.addObj = row;
       this.orderInfo = {
         company_name: row.company_name,
@@ -1369,15 +1395,29 @@ export default {
       this.infoId = row.order_id;
       outStorageHistory(row.order_id).then((res) => {
         this.infoList = res.data.res || { order_infos: [] };
-        this.printInfo = res.data.res;
-      console.log(this.outInfo,this.printInfo);
+        this.printInfo = res.data.res || { order_infos: [] };
+        //++
+        // this.printInfo={
+        //   order_infos:[
+        //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
+        //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
+        //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
+        //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
+        //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
+        //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
+        //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
+        //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
 
+        //   ]
+        // }
+
+        console.log(this.outInfo, this.printInfo);
       });
       this.isInfo = true;
       this.visibleInfo = true;
     },
     closeInfo() {
-      this.showPrint =false;
+      this.showPrint = false;
       this.isInfo = false;
       this.visibleInfo = false;
       this.showIndex = 0;
@@ -1537,7 +1577,7 @@ export default {
 
 .indext {
   .cell {
-    margin: 12px 0;
+    margin: 14px 0;
   }
 }
 

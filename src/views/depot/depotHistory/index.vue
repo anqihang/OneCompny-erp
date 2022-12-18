@@ -1567,7 +1567,7 @@ export default {
 
 .index {
   .cell {
-    margin: 12px 0;
+    margin: 14px 0;
   }
 }
 

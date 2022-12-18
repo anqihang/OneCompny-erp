@@ -2,21 +2,21 @@ import axios from "axios";
 import { MessageBox, Message } from "element-ui";
 import store from "@/store";
 import { getToken } from "@/utils/auth";
-import {url} from '@/utils/url'
+import { url } from '@/utils/url'
 
 // create an axios instance
 const service = axios.create({
   //-----------------------------------------------------------------------------------------------
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // baseURL: "http://192.168.1.122:8080", // url = base url + request url
-  // baseURL:"http://tongyu.api.ltokay.cn",
-  baseURL:"http://ltql.api.ltokay.cn",
+  baseURL: "http://tongyu.api.ltokay.cn",
+  // baseURL: "http://ltql.api.ltokay.cn",
   // baseURL:url,
-  
+
   // baseURL: 'http://127.0.0.1:4523/m1/1930977-0-default', // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000, // request timeout
- 
+
 });
 
 // request interceptor
@@ -31,7 +31,7 @@ service.interceptors.request.use(
       //------------
       // console.log(1,getToken());
       // config.headers['X-Token'] ='bearer '+ getToken()
-      config.headers['Authorization'] ='bearer '+ getToken()
+      config.headers['Authorization'] = 'bearer ' + getToken()
 
     }
     // if(localStorage.getItem('ax-token')){
@@ -87,7 +87,7 @@ service.interceptors.response.use(
         //     type: "warning",
         //   }
         // ).then(() => {
-          
+
         // });
       }
       // console.log(7);
