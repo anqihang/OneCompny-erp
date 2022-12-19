@@ -160,5 +160,8 @@ export default {
 #el-drawer__title{
   margin-bottom: 0;
 }
+.el-icon-circle-close{
+  color:white;
+}
 </style>
 

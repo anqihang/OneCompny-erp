@@ -812,7 +812,7 @@
             label="状态"
             align="center"
             width="80"
-            class-name="li index"
+            class-name="li index stp"
           >
             <template slot-scope="scope">
               <el-tag
@@ -822,14 +822,13 @@
               >
             </template>
           </el-table-column>
-
           <el-table-column
             align="center"
             label="操作"
             fixed="right"
             width="200"
             class="operation"
-            class-name="button editButton pay to"
+            class-name="button editButton pay to mt"
             style="border-left: 1px solid #ebeef5"
           >
             <template slot-scope="scope" style="display: flex">
@@ -842,7 +841,6 @@
                 >收款</el-button
               >
               <el-button type="info" size="small" v-if="!payL"></el-button>
-
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
               <el-button type="info" size="small"></el-button>
@@ -1965,6 +1963,14 @@ sm:0,
 .state{
   .cell{
     margin-top: 14px;
+  }
+}
+.mt{
+  margin-top:14px;
+}
+.stp{
+  .cell{
+    margin-top:14px;
   }
 }
 </style>

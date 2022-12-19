@@ -275,6 +275,22 @@
           </template>
           <!-- 深圳市艾联特电子科技有限公司 -->
         </el-table-column>
+        <el-table-column align="center" label="客户简称" width="120" class-name="li">
+          <template slot-scope="scope">
+            <span
+                class="threeLine"
+                slot="reference"
+                style="
+                  display: flex;
+                  justify-content: start;
+                  text-align: start !important;
+                "
+              >
+            {{ scope.row.company_nickname }}
+            </span>  
+          </template>
+          <!-- 深圳市艾联特电子科技有限公司 -->
+        </el-table-column>
         <template v-if="!person_flag">
           <el-table-column align="center" label="地址" min-width="220" class-name="li" key="1">
             <template slot-scope="scope">

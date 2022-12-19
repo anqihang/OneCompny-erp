@@ -162,6 +162,7 @@
         >
           {{ item.title }}
         </el-button>
+        <button ref="prin" v-show="false" v-print="printv"></button>
       </div>
     </div>
   </div>
@@ -183,6 +184,20 @@ export default {
       infos: [],
       isOrder: false,
       removeFile: true,
+      printv:{
+        id:'printBox',
+        clickMounted(){
+        },
+        beforeOpenCallback(){
+          console.log('before');
+        },
+        openCallback(){
+          console.log('open');
+        },
+        closeCallback:()=>{
+          this.$emit('printed');
+        }
+      }
     };
   },
   props: {
@@ -212,6 +227,7 @@ export default {
     orders: {
       type: Boolean,
     },
+    print:{}
   },
   mounted() {
     this.$bus.$on("edit", this.copy);
@@ -220,6 +236,9 @@ export default {
     this.$bus.$off("edit");
   },
   methods: {
+    startPrint(){
+      this.$refs.prin.click();
+    },
     checkValue(item, index) {
       console.log(this.value);
       if (item.title == "付款金额") {
@@ -408,10 +427,7 @@ export default {
           break;
         case "确定":
           {
-            console.log(1);
-            console.log(this.orders);
             if (this.isOrder || this.orders) {
-              console.log(2);
               getCompanyList(this.searchInfo[0]).then((res) => {
                 // this.searchInfo[0]=res.data.res[0].id
                 if (!res.data.res[0]) {
@@ -428,8 +444,6 @@ export default {
                 }
               });
             } else {
-              // console.log("0-0000");
-              // console.log(this.$bus);
               this.$bus.$emit("storage", this.searchInfo);
             }
           }

@@ -57,6 +57,8 @@
       :wrapperClosable="false"
     >
       <Search
+        ref="search"
+        @printed="printed"
         :search="[
           { title: '出库人', type: 'input' },
           { title: '出库单号', type: 'input' },
@@ -64,6 +66,7 @@
           { title: '备注', type: 'input' },
         ]"
         :button="[{ title: '确定', type: 'primary', if: true }]"
+        :print="$refs.print"
       ></Search>
       <div style="display: flex; flex-wrap: wrap" class="info">
         <div style="width: 33%">
@@ -86,7 +89,7 @@
         <div
           style="
             font-size: 25px;
-            margin: 10px;
+            margin: 10px 0 0 0;
             display: flex;
             justify-content: space-between;
           "
@@ -168,7 +171,6 @@
                 </span>
               </template>
             </el-table-column>
-
             <el-table-column
               label="产品规格"
               align="center"
@@ -485,14 +487,14 @@
             align="center"
             label="出库单号"
             width="170"
-            class-name="mor inputLi"
+            class-name="mor "
           >
             <template slot-scope="scope">
               <div
                 v-for="(item, index) in scope.row.outblound_infos"
                 :key="index"
                 style="
-                  height: 126px;
+                  height: 135px;
                   position: relative;
                   text-align: start;
                   border-top: 1px solid #ebeef5;
@@ -514,28 +516,21 @@
             align="center"
             label="出库人"
             width="80"
-            class-name="mor inputLi"
+            class-name="mor "
           >
             <template slot-scope="scope">
               <div
                 v-for="(item, index) in scope.row.outblound_infos"
                 :key="index"
                 style="
-                  height: 126px;
+                  height: 135px;
                   position: relative;
                   text-align: start;
                   border-top: 1px solid #ebeef5;
                   margin-top: -2px;
                 "
               >
-                <!-- <span v-if="!(showIndex == scope.row.customer_code&&showTime == item.create_time)"> -->
                 {{ item.outdown_name }}
-                <!-- </span> -->
-                <!-- <el-input
-              v-if="(showIndex == scope.row.customer_code&&showTime == item.create_time)"
-                  placeholder="请输入"
-                  v-model="perInfo.person"
-                ></el-input> -->
               </div>
             </template>
           </el-table-column>
@@ -543,7 +538,7 @@
             label="出库数"
             align="center"
             width="100"
-            class-name="mor inputLi"
+            class-name="mor "
           >
             <template slot-scope="scope">
               <div
@@ -558,7 +553,7 @@
                   v-for="(item, index) in scope.row.outblound_infos"
                   :key="index"
                   style="
-                    height: 126px;
+                    height: 135px;
                     position: relative;
                     text-align: start;
                     border-top: 1px solid #ebeef5;
@@ -605,7 +600,7 @@
                 v-for="(item, index) in scope.row.outblound_infos"
                 :key="index"
                 style="
-                  height: 126px;
+                  height: 135px;
                   position: relative;
                   text-align: start;
                   border-top: 1px solid #ebeef5;
@@ -630,7 +625,7 @@
                 v-for="(item, index) in scope.row.outblound_infos"
                 :key="index"
                 style="
-                  height: 126px;
+                  height: 135px;
                   position: relative;
                   text-align: start;
                   border-top: 1px solid #ebeef5;
@@ -665,7 +660,7 @@
                   v-for="(item, index) in scope.row.outblound_infos"
                   :key="index"
                   style="
-                    height: 126px;
+                    height: 135px;
                     position: relative;
                     text-align: start;
                     border-top: 1px solid #ebeef5;
@@ -737,7 +732,7 @@
                 <el-button
                   type="primary"
                   size="small"
-                  @click="print(index)"
+                  @click="print(index, item)"
                   v-print="'#printBox'"
                   >打印</el-button
                 >
@@ -1103,21 +1098,25 @@
     </div>
     <div ref="print" id="printBox">
       <Print
+        v-for="(item, index) in Math.ceil(printInfo.order_infos.length / 6)"
+        :key="index"
         style="page-break-after: always"
-        v-show="showPrint && printInfo.order_infos.length >= 1"
-        :order_infos="printInfo.order_infos.slice(0, 6)"
+        v-show="showPrint && printInfo.order_infos.length >= 6 * index + 1"
+        :order_infos="printInfo.order_infos.slice(6 * index, 6 * (index + 1))"
         :printInfo="printInfo"
         :outInfo="outInfo"
         :index="index"
+        :item="item"
       ></Print>
-      <Print
+      <!-- <Print
         style="page-break-after: always"
         v-show="showPrint && printInfo.order_infos.length >= 7"
         :order_infos="printInfo.order_infos.slice(6, 12)"
         :printInfo="printInfo"
         :outInfo="outInfo"
         :index="index"
-      ></Print>
+        :item='item'
+      ></Print> -->
     </div>
   </div>
 </template>
@@ -1201,12 +1200,17 @@ export default {
       },
       //
       classmodel: null,
+      printClone: {
+        order_infos: [],
+      },
       printInfo: {
         order_infos: [],
       },
       outInfo: null,
       index: 0,
       showPrint: true,
+      row: null,
+      item: "",
     };
   },
   created() {
@@ -1221,9 +1225,21 @@ export default {
     this.$bus.$off();
   },
   methods: {
-    print(index) {
-      console.log(index);
+    print(index, item) {
       this.index = index;
+      this.item = cloneDeep(item);
+      let number = this.item.out_number;
+      this.printInfo = cloneDeep(this.printClone);
+      for (const iterator of this.printInfo.order_infos) {
+        let obj = {};
+        for (const iterator1 of iterator.outblound_infos) {
+          if (iterator1.out_number == number) {
+            obj = iterator1;
+            // iterator.outblound_infos = iterator1;
+          }
+        }
+        iterator.outblound_infos = obj;
+      }
     },
     checkNumber(scope) {
       if (
@@ -1290,12 +1306,21 @@ export default {
     },
     //
     openAddDrawer(row) {
+      this.showPrint = true;
       //++
       // this.outInfo = row;
+      // console.log(row);
+      this.row = row;
+      this.printInfo = row;
+      this.outInfo = row;
       this.addObj = row;
       this.visibleAdd = true;
     },
     closeAddDrawer() {
+      this.showPrint = false;
+      this.printInfo = {
+        order_infos: [],
+      };
       this.perNumber = [];
       this.$bus.$emit("edit", []);
       this.visibleAdd = false;
@@ -1303,7 +1328,6 @@ export default {
     //发送出库信息
     outStorage(searchInfo) {
       // this.print();
-
       let data = new FormData();
       let infos = [];
       let ok = true;
@@ -1331,19 +1355,23 @@ export default {
           infos.push(obj);
         }
       }
-      for (const index in infos) {
-        if (infos[index].number == 0) {
-          infos.splice(index, 1);
-        }
+      let newInfos = infos.filter((item, index) => {
+        return item.number > 0;
+      });
+      if(newInfos.length==0){
+        ok=false;
+        this.$message({
+          message:'请输入有效的出库数',
+          type:'error'
+        })
       }
-      console.log(infos);
-
       data.append("outdown_name", searchInfo[0] || "");
       data.append("out_number", searchInfo[1] || "");
       data.append("remarks", searchInfo[3] || "");
       data.append("outblound_image", searchInfo[2] || "");
-      data.append("outblound_infos", JSON.stringify(infos) || "");
+      data.append("outblound_infos", JSON.stringify(newInfos) || "");
       data.append("order_id", this.addObj.order_id || "");
+      data.append("company_nickname", this.row.company_nickname);
 
       if (!searchInfo[0]) {
         this.$message({
@@ -1373,14 +1401,33 @@ export default {
         });
         return;
       }
-
       if (ok) {
         outStorage(data).then((res) => {
-          console.log(res);
-          this.closeAddDrawer();
-          this.fetchData();
+          if (newInfos.length > 0) {
+            outStorageHistory(this.row.order_id).then((res) => {
+              // this.serial = res.data.res.serial_code;
+              this.printInfo = res.data.res || { order_infos: [] };
+              for (const iterator of this.printInfo.order_infos) {
+                let obj = {};
+                for (const iterator1 of iterator.outblound_infos) {
+                  if (iterator1.out_number == searchInfo[1]) {
+                    obj = iterator1;
+                  }
+                }
+                iterator.outblound_infos = obj;
+              }
+              this.$refs.search.startPrint();
+              // this.closeAddDrawer();
+              // this.fetchData();
+            });
+          }
         });
       }
+    },
+    //打印后
+    printed() {
+      this.closeAddDrawer();
+      this.fetchData();
     },
     //
     openInfo(row) {
@@ -1394,10 +1441,12 @@ export default {
       };
       this.infoId = row.order_id;
       outStorageHistory(row.order_id).then((res) => {
+        // this.serial = res.data.res.serial_code;
         this.infoList = res.data.res || { order_infos: [] };
-        this.printInfo = res.data.res || { order_infos: [] };
+        this.printClone = res.data.res || { order_infos: [] };
+        // this.printInfo = cloneDeep(res.data.res || { order_infos: [] });
         //++
-        // this.printInfo={
+        // this.printClone={
         //   order_infos:[
         //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
         //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
@@ -1407,7 +1456,6 @@ export default {
         //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
         //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
         //     {product_code:11,product_name:'aa',product_specs:'',outblound_infos:[],},
-
         //   ]
         // }
 
@@ -1417,6 +1465,7 @@ export default {
       this.visibleInfo = true;
     },
     closeInfo() {
+      this.printClone = {};
       this.showPrint = false;
       this.isInfo = false;
       this.visibleInfo = false;
@@ -1510,7 +1559,6 @@ export default {
     min-height: 127px;
   }
 }
-
 .mor {
   padding: 0 !important;
 
@@ -1521,7 +1569,6 @@ export default {
     padding-right: 0;
   }
 }
-
 //不要和mor放在.outDepot里
 .outDepot {
   .infoD {
@@ -1541,7 +1588,6 @@ export default {
     }
   }
 }
-
 .addDrawer {
   .el-drawer {
     min-width: 1400px;
@@ -1551,7 +1597,6 @@ export default {
     }
   }
 }
-
 .info {
   // margin: 10px;
   justify-content: flex-start;
@@ -1574,13 +1619,11 @@ export default {
     }
   }
 }
-
 .indext {
   .cell {
     margin: 14px 0;
   }
 }
-
 .table {
   .infoD_t {
     .el-table__header-wrapper {
@@ -1623,6 +1666,7 @@ export default {
   }
 }
 .editButton {
+  padding-bottom: 8px !important;
   .cell {
     padding-left: 0 !important;
     padding-top: 0 !important;

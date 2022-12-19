@@ -80,17 +80,17 @@
         </div>
       </div>
 
-      <div style="background-color: #f5f7fa; height: 4px; margin: 17px 0 8px"></div>
+      <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0 10px"></div>
 
       <div>
-        <div
+        <!-- <div
           style="
             font-size: 25px;
             margin: 10px;
             display: flex;
             justify-content: space-between;
           "
-        ></div>
+        ></div> -->
         <div class="inpu">
           <el-table
             :data="addObj.order_infos"
@@ -639,7 +639,7 @@
             align="center"
             label="入库单图片"
             width="100"
-            class-name="mor indext"
+            class-name="mor"
           >
             <template slot-scope="scope">
               <div
@@ -710,7 +710,7 @@
             fixed="right"
             width="200"
             class="operation"
-            class-name="button editButton"
+            class-name="button editButton indept"
             style="border-left: 1px solid red"
           >
             <template slot-scope="scope" style="display: flex">
@@ -1634,6 +1634,12 @@ export default {
 .inbound {
   .el-drawer {
     overflow: auto;
+  }
+}
+.indept{
+  .cell{
+    padding-right:0px;
+    padding-bottom:0px!important;
   }
 }
 </style>

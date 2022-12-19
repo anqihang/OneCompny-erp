@@ -8,8 +8,8 @@ import { url } from '@/utils/url'
 const service = axios.create({
   //-----------------------------------------------------------------------------------------------
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  // baseURL: "http://192.168.1.122:8080", // url = base url + request url
-  baseURL: "http://tongyu.api.ltokay.cn",
+  baseURL: "http://192.168.1.122:8080", // url = base url + request url
+  // baseURL: "http://tongyu.devapi.ltokay.cn",
   // baseURL: "http://ltql.api.ltokay.cn",
   // baseURL:url,
 

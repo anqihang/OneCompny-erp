@@ -867,7 +867,7 @@
         <el-table-column
           label="订单状态"
           align="center"
-          width="100"
+          width="80"
           class-name="li"
         >
           <template slot-scope="scope">

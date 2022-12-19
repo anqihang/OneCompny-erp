@@ -40,10 +40,10 @@
     <div class="tt">
       <div>
         <div>客户名称:{{ printInfo.company_name || "" }}</div>
-        <div>客户地址:{{ printInfo.address }}</div>
+        <div>送货单号:{{ out_number }}</div>
       </div>
       <div>
-        <div>送货单号:{{ out_number }}</div>
+        <div>客户地址:{{ printInfo.address }}</div>
         <div style="display: flex">
           <div
             style="width: 55px; display: flex; justify-content: space-between"
@@ -73,7 +73,6 @@
             <th style="width: 100px">累交数量</th>
             <th scope="col" style="width: 150px">备注</th>
           </tr>
-
           <tr v-for="(item, index1) in order_infos" :key="index1">
             <td>{{ index1 + 1 }}</td>
             <td>{{ outInfo.order_number }}</td>
@@ -84,17 +83,13 @@
             <td></td>
             <td>
               {{
-                item.outblound_infos[index]
-                  ? item.outblound_infos[index].number
-                  : 0
+                item.outblound_infos.number ? item.outblound_infos.number : 0
               }}
             </td>
             <td>{{ item.out_total }}</td>
             <td>
               {{
-                item.outblound_infos[index]
-                  ? item.outblound_infos[index].remarks
-                  : ""
+                item.outblound_infos.remarks ? item.outblound_infos.remarks : ""
               }}
             </td>
           </tr>
@@ -179,6 +174,9 @@
       <div style="width: 50%">递货单位/经手人：</div>
       <div style="width: 30%">收货单位/收货人(盖章):</div>
     </div>
+    <div class="stream">
+         No:{{serial}}
+    </div>
   </div>
 </template>
 
@@ -188,6 +186,7 @@ export default {
   data() {
     return {};
   },
+  updated() {},
   props: {
     printInfo: {
       type: Object,
@@ -201,19 +200,36 @@ export default {
     index: {
       type: Number,
     },
+    item: {},
+    serial:{
+    }
   },
   computed: {
+    infoList() {
+      //出库单
+    },
+    //送货单号
     out_number() {
       for (const iterator of this.printInfo.order_infos) {
-        if (iterator.outblound_infos[this.index]) {
-          return iterator.outblound_infos[this.index].out_number;
+        if (iterator.outblound_infos) {
+          if (iterator.outblound_infos.out_number) {
+            return iterator.outblound_infos.out_number;
+          }
+        } else {
         }
       }
     },
+    serial(){
+      
+    },
+    // 时间
     create_time() {
       for (const iterator of this.printInfo.order_infos) {
-        if (iterator.outblound_infos[this.index]) {
-          return iterator.outblound_infos[this.index].create_time;
+        if (iterator.outblound_infos) {
+          if (iterator.outblound_infos.create_time) {
+            return iterator.outblound_infos.create_time;
+          }
+        } else {
         }
       }
     },
@@ -221,8 +237,11 @@ export default {
       let value = 0;
       for (const iterator of this.printInfo.order_infos) {
         // value+=iterator.price+
-        if (iterator.outblound_infos[this.index]) {
-          value += iterator.price * iterator.outblound_infos[this.index].number;
+        if (iterator.outblound_infos) {
+          if (iterator.outblound_infos.number) {
+            value +=
+              iterator.price * new Number(iterator.outblound_infos.number);
+          }
         }
       }
       function NumFormat(value) {
@@ -235,8 +254,11 @@ export default {
       let value = 0;
       for (const iterator of this.printInfo.order_infos) {
         // value+=iterator.price+
-        if (iterator.outblound_infos[this.index]) {
-          value += iterator.price * iterator.outblound_infos[this.index].number;
+        if (iterator.outblound_infos) {
+          if (iterator.outblound_infos.number) {
+            value +=
+              iterator.price * new Number(iterator.outblound_infos.number);
+          }
         }
       }
       return this.numberToChinese(value);
@@ -285,6 +307,7 @@ export default {
   width: 700px;
   //   height: 500px;
   background-color: white;
+  //---
   // position: fixed;
   top: 20px;
   left: 0;
@@ -383,5 +406,11 @@ export default {
       font-size: 12px;
     }
   }
+}
+.stream{
+  // background-color: red;
+  transform: translateY(-1750%) translateX(220%);
+  font-size: 20px;
+  font-weight:700;
 }
 </style>
