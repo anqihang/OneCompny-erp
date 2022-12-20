@@ -603,7 +603,7 @@ export function deleteUser(params){
 export function changePwd(data){
   return request({
     url:"/admin/system/admin_password_edit",
-    method:'psot',
+    method:'post',
     data:{
       id:data.id,
       pwd:data.password

@@ -43,7 +43,7 @@
       </el-form>
       <div style="float: right; margin-right: 30px">
         <el-button @click="closeAdd">取消</el-button>
-        <el-button type="primary">确定</el-button>
+        <el-button type="primary" @click="sendPwd">确定</el-button>
       </div>
     </el-drawer>
   </div>

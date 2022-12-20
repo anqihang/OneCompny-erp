@@ -15,3 +15,8 @@
 // console.log(a);
 // let a = 7;
 // console.log(Math.ceil(a/6));
+let arrbuf = new ArrayBuffer(16);
+let view = new DataView(arrbuf);
+console.log(view.byteLength);
+view.setInt8(1,127);
+console.log(view.getInt8(15));
