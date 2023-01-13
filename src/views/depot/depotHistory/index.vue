@@ -80,7 +80,9 @@
         </div>
       </div>
 
-      <div style="background-color: #f5f7fa; height: 4px; margin: 10px 0 10px"></div>
+      <div
+        style="background-color: #f5f7fa; height: 4px; margin: 10px 0 10px"
+      ></div>
 
       <div>
         <!-- <div
@@ -301,7 +303,7 @@
           { title: '重置', type: '', if: true },
         ]"
       ></Search>
-      <div style="display: flex; flex-wrap: wrap;margin-top:8px" class="info">
+      <div style="display: flex; flex-wrap: wrap; margin-top: 8px" class="info">
         <div style="width: 33%">
           <div>客户名称</div>
           <div>{{ addObj.company_name }}</div>
@@ -315,15 +317,7 @@
           <div>{{ addObj.status == 0 ? "进行中" : "已完成" }}</div>
         </div>
       </div>
-      <div
-        style="
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          top: 218px;
-        "
-      >
+      <div style="position: absolute; left: 0; right: 0; bottom: 0; top: 218px">
         <el-table
           class="infoD_t"
           height="100%"
@@ -657,9 +651,7 @@
                   style="position: relative"
                   :src="url + item.godown_image"
                   :fit="'contain'"
-                  :preview-src-list="[
-                    url + item.godown_image,
-                  ]"
+                  :preview-src-list="[url + item.godown_image]"
                 ></el-image>
               </div>
             </template>
@@ -671,7 +663,6 @@
             class-name="li"
           >
             <template slot-scope="scope">
-              
               <div
                 style="
                   width: 100%;
@@ -680,28 +671,28 @@
                   flex-direction: column;
                 "
               >
-              <div
-                v-for="(item, index) in scope.row.inblound_infos"
-                :key="index"
-                style="
-                  height: 135px;
-                  position: relative;
-                  text-align: start;
-                  border-top: 1px solid #ebeef5;
-                  margin-top: -2px;
-                "
-              >
-                <span
+                <div
+                  v-for="(item, index) in scope.row.inblound_infos"
+                  :key="index"
                   style="
-                    display: flex;
-                    justify-content: start;
-                    text-align: start !important;
+                    height: 135px;
+                    position: relative;
+                    text-align: start;
+                    border-top: 1px solid #ebeef5;
+                    margin-top: -2px;
                   "
                 >
-                  {{ item.remarks }}
-                </span>
+                  <span
+                    style="
+                      display: flex;
+                      justify-content: start;
+                      text-align: start !important;
+                    "
+                  >
+                    {{ item.remarks }}
+                  </span>
+                </div>
               </div>
-            </div>
             </template>
           </el-table-column>
           <el-table-column
@@ -788,7 +779,7 @@
           class-name="li first"
         >
           <template slot-scope="scope">
-            {{ (page_current-1)*100+scope.$index + 1 }}
+            {{ (page_current - 1) * 100 + scope.$index + 1 }}
           </template>
         </el-table-column>
         <el-table-column
@@ -1040,7 +1031,12 @@
               icon-color="red"
               @onConfirm="deleteEnter(scope.row)"
             >
-              <el-button type="danger" size="small" slot="reference" v-if="deleteI">
+              <el-button
+                type="danger"
+                size="small"
+                slot="reference"
+                v-if="deleteI"
+              >
                 删除
               </el-button>
             </el-popconfirm>
@@ -1080,8 +1076,7 @@ import {
 } from "@/api/table";
 import Search from "@/components/Search/index.vue";
 import cloneDeep from "lodash/cloneDeep";
-import {url} from '@/utils/url';
-
+import { url } from "@/utils/url";
 
 export default {
   components: {
@@ -1101,19 +1096,20 @@ export default {
     this.$bus.$on("storage", this.enterStorage);
   },
   computed: {
-    url(){
+    url() {
       return url;
     },
-    auth_id(){
-      return localStorage.getItem('auth_id').split(',');
+    auth_id() {
+      return localStorage.getItem("auth_id").split(",");
     },
-    inS(){
-      return this.auth_id.includes('23');
+    inS() {
+      return this.auth_id.includes("23");
     },
-    deleteI(){
-      return this.auth_id.includes('24');
-    },editI(){
-      return this.auth_id.includes('25');
+    deleteI() {
+      return this.auth_id.includes("24");
+    },
+    editI() {
+      return this.auth_id.includes("25");
     },
   },
   data() {
@@ -1167,8 +1163,8 @@ export default {
   methods: {
     checkInNum(scope) {
       if (
-        (scope.row.not_in_number < this.perNumber[scope.$index]) ||
-        this.perNumber[scope.$index]<0
+        scope.row.not_in_number < this.perNumber[scope.$index] ||
+        this.perNumber[scope.$index] < 0
       ) {
         this.$set(this.perNumber, scope.$index, 0);
         this.$message({
@@ -1268,47 +1264,45 @@ export default {
         infos.push(obj);
       }
       for (const index in infos) {
-          if(infos[index].number==0){
-            infos.splice(index,1);
-          }
+        if (infos[index].number == 0) {
+          infos.splice(index, 1);
         }
+      }
       data.append("godown_name", searchInfo[0] || "");
       data.append("odd_number", searchInfo[1] || "");
       data.append("remarks", searchInfo[3] || "");
       data.append("inblound_image", searchInfo[2] || "");
+      //发送的是JSON的数组字符串
       data.append("inblound_infos", JSON.stringify(infos) || "");
       data.append("order_id", this.order_id || "");
-          if(!searchInfo[0]){
-          this.$message({
-            message:'请填写入库人',
-            type:'error'
-          })
-          return
-        }
-        if(!searchInfo[1]){
-          this.$message({
-            message:'请填写入图库单号',
-            type:'error'
-          })
-          return
-
-        }
-        if(!searchInfo[2]){
-          this.$message({
-            message:'请选择入库单图片',
-            type:'error'
-          })
-          return
-
-        }
-        if(infos.length<=0){
-          this.$message({
-            message:'请填写产品入库数',
-            type:'error'
-          })
-          return
-
-        }
+      if (!searchInfo[0]) {
+        this.$message({
+          message: "请填写入库人",
+          type: "error",
+        });
+        return;
+      }
+      if (!searchInfo[1]) {
+        this.$message({
+          message: "请填写入图库单号",
+          type: "error",
+        });
+        return;
+      }
+      if (!searchInfo[2]) {
+        this.$message({
+          message: "请选择入库单图片",
+          type: "error",
+        });
+        return;
+      }
+      if (infos.length <= 0) {
+        this.$message({
+          message: "请填写产品入库数",
+          type: "error",
+        });
+        return;
+      }
       if (ok) {
         enterStorage(data).then((res) => {
           this.closeAddDrawer();
@@ -1636,10 +1630,10 @@ export default {
     overflow: auto;
   }
 }
-.indept{
-  .cell{
-    padding-right:0px;
-    padding-bottom:0px!important;
+.indept {
+  .cell {
+    padding-right: 0px;
+    padding-bottom: 0px !important;
   }
 }
 </style>

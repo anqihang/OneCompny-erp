@@ -1,12 +1,21 @@
 <template>
-  <div class="sidebar-logo-container logoOut" :class="{'collapse':collapse}" >
+  <div class="sidebar-logo-container logoOut" :class="{ collapse: collapse }">
     <transition name="sidebarLogoFade">
       <!-- <router-link v-if="collapse" key="collapse" class="sidebar-logo-link" to="/">
         <img v-if="logo" src="@/assets/微信图片_20221207092409.jpg" class="sidebar-logo logos">
         <h1 v-else class="sidebar-title">{{ title }} </h1>
       </router-link> -->
-      <router-link v-if="!collapse" key="expand" class="sidebar-logo-link" to="/">
-        <img v-if="logo" src="@/assets/微信图片_20221207120002.png" class="sidebar-logo logo">
+      <router-link
+        v-if="!collapse"
+        key="expand"
+        class="sidebar-logo-link"
+        to="/"
+      >
+        <img
+          v-if="logo"
+          src="@/assets/微信图片_20221212090658.png"
+          class="sidebar-logo logo"
+        />
         <!-- <h1 class="sidebar-title">{{ title }} </h1> -->
       </router-link>
     </transition>
@@ -15,45 +24,45 @@
 
 <script>
 export default {
-  name: 'SidebarLogo',
+  name: "SidebarLogo",
   props: {
     collapse: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
-      title: 'Vue Admin Template',
+      title: "Vue Admin Template",
       // logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
-      logo:'1'
-    }
+      logo: "1",
+    };
   },
-  watch:{
-    collapse(){
+  watch: {
+    collapse() {
       // if(this.collapse){
-        // this.$bus.$emit('changeLogo',this.collapse);
+      // this.$bus.$emit('changeLogo',this.collapse);
       // }
       // this.$store.state.settings.sidebarLogo = this.
-    }
+    },
   },
-}
+};
 </script>
 
 <style lang="scss" scoped>
-.logoOut{
-  height: 60px!important;
+.logoOut {
+  // height: 145px !important;
   overflow: hidden;
-  background-color: #304156!important;
+  background-color: #304156 !important;
 }
-.logo{
-  width:100%!important;
-  height: 100%!important;
+.logo {
+  width: 100% !important;
+  height: 100% !important;
   background-color: #304156;
 }
-.logos{
+.logos {
   width: 210px;
-  height: 100%!important;
+  height: 100% !important;
 }
 .sidebarLogoFade-enter-active {
   transition: opacity 1.5s;
@@ -67,8 +76,8 @@ export default {
 .sidebar-logo-container {
   position: relative;
   width: 100%;
-  height: 50px;
-  line-height: 50px;
+  // height: 50px;
+  // line-height: 50px;
   background: #2b2f3a;
   text-align: center;
   overflow: hidden;

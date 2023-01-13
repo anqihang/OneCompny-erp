@@ -63,10 +63,10 @@
         </div>
       </div> -->
       <div v-if="allShow" id="add">
-        <div style="display: flex; align-items: center;height:40px;">
+        <div style="display: flex; align-items: center; height: 40px">
           <el-image
             @click="showInput(0)"
-            style="width: 20px; height: 20px; cursor: pointer;margin-right:0;"
+            style="width: 20px; height: 20px; cursor: pointer; margin-right: 0"
             :src="require('@/assets/jia.png')"
             :fit="'fit'"
           ></el-image>
@@ -104,9 +104,17 @@
       <div style="min-height: 80vh" id="show"></div>
     </el-dialog>
   </div>
+  <!-- !a -->
 </template>
 
 <script>
+/**
+ * !
+ */
+/**
+ !
+ */
+//!
 import { mapGetters } from "vuex";
 import * as echarts from "echarts";
 import { normalize } from "path";
@@ -186,10 +194,10 @@ export default {
   methods: {
     close(index) {
       this.show[index] = false;
-      let add = document.querySelector('#add');
+      let add = document.querySelector("#add");
       let mo = document.querySelector(`#${index}`);
-      let sort = document.getElementById('sort');
-      sort.insertBefore(mo,add);
+      let sort = document.getElementById("sort");
+      sort.insertBefore(mo, add);
     },
     showInput(index) {
       this.addShow = !this.addShow;
@@ -269,7 +277,7 @@ export default {
             left: 10,
             top: 10,
           },
-          // grid: {
+          // !grid: {
           //   // top: 100,
           //   // right: 100,
           //   bottom: 0,
@@ -325,7 +333,7 @@ export default {
             top: 10,
           },
           legend: {
-            // type:'scroll',
+            //! type:'scroll',
             // right:10,
             // top:10
           },
@@ -386,6 +394,7 @@ export default {
 </script>
 
 <style lang="scss">
+/* ! */
 .main {
   // position: absolute;
   // top: 0;
@@ -452,7 +461,7 @@ export default {
   width: 100%;
   height: 100%;
 }
-.b {
-  // grid-area: b;
-}
+// .b {
+//   // grid-area: b;
+// }
 </style>

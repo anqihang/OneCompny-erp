@@ -1,20 +1,22 @@
 <template>
   <section class="app-main">
     <transition name="fade-transform" mode="out-in">
-      <router-view :key="key" />
+      <keep-alive>
+        <router-view :key="key" />
+      </keep-alive>
     </transition>
   </section>
 </template>
 
 <script>
 export default {
-  name: 'AppMain',
+  name: "AppMain",
   computed: {
     key() {
-      return this.$route.path
-    }
-  }
-}
+      return this.$route.path;
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -22,11 +24,11 @@ export default {
   /*50 = navbar  */
   min-height: calc(100vh - 50px);
   width: 100%;
-  min-width:840px;
+  min-width: 840px;
   position: relative;
   overflow: hidden;
 }
-.fixed-header+.app-main {
+.fixed-header + .app-main {
   padding-top: 50px;
 }
 </style>
